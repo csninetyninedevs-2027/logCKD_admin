@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/admin_page_header.dart';
 import '../../../shared/widgets/admin_reveal.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/widgets/admin_status_badge.dart';
 import '../../../shared/widgets/admin_surface.dart';
 import '../state/users_provider.dart';
@@ -69,7 +70,7 @@ class UserDetailScreen extends ConsumerWidget {
     final detailAsync = ref.watch(userDetailProvider(userId));
 
     return Padding(
-        padding: const EdgeInsets.fromLTRB(28, 26, 28, 24),
+        padding: AdminResponsive.pageInsets(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

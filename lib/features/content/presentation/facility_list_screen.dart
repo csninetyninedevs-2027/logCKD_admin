@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/facility.dart';
 import '../../../shared/utils/admin_input_validation.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../state/facility_provider.dart';
 
 class FacilityListScreen extends ConsumerStatefulWidget {
@@ -15,10 +16,12 @@ class FacilityListScreen extends ConsumerStatefulWidget {
 
 class _FacilityListScreenState extends ConsumerState<FacilityListScreen> {
   final _searchController = TextEditingController();
+  final _tableScrollController = ScrollController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _tableScrollController.dispose();
     super.dispose();
   }
 
@@ -94,34 +97,31 @@ class _FacilityListScreenState extends ConsumerState<FacilityListScreen> {
     final params = ref.watch(facilityListParamsProvider);
 
     return Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AdminResponsive.pageInsets(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Facilities', style: Theme.of(context).textTheme.headlineLarge),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 280,
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Search by name',
-                          prefixIcon: Icon(Icons.search, size: 20),
-                        ),
-                        onSubmitted: _onSearchSubmitted,
-                      ),
+            AdminResponsiveHeader(
+              heading: Text(
+                'Facilities',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              actions: [
+                SizedBox(
+                  width: AdminResponsive.actionWidth(context, maxWidth: 280),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search by name',
+                      prefixIcon: Icon(Icons.search, size: 20),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: () => _openFacilityDialog(),
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Add Facility'),
-                    ),
-                  ],
+                    onSubmitted: _onSearchSubmitted,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _openFacilityDialog(),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Facility'),
                 ),
               ],
             ),
@@ -136,64 +136,83 @@ class _FacilityListScreenState extends ConsumerState<FacilityListScreen> {
                   }
 
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
                         child: SingleChildScrollView(
                           child: Card(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: DataTable(
-                                columns: const [
-                                  DataColumn(label: Text('#')),
-                                  DataColumn(label: Text('Name')),
-                                  DataColumn(label: Text('Province')),
-                                  DataColumn(label: Text('City/Municipality')),
-                                  DataColumn(label: Text('Mapped')),
-                                  DataColumn(label: Text('Actions')),
-                                ],
-                                rows: [
-                                  for (final facility in page.facilities)
-                                    DataRow(cells: [
-                                      DataCell(Text(facility.facilityNumber.toString())),
-                                      DataCell(Text(facility.name)),
-                                      DataCell(Text(facility.province ?? '-')),
-                                      DataCell(Text(facility.cityMunicipality ?? '-')),
-                                      DataCell(
-                                        Icon(
-                                          facility.latitude != null
-                                              ? Icons.check_circle
-                                              : Icons.remove_circle_outline,
-                                          size: 18,
-                                          color: facility.latitude != null
-                                              ? AppColors.success
-                                              : AppColors.textSecondary,
-                                        ),
-                                      ),
-                                      DataCell(Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit_outlined, size: 18),
-                                            onPressed: () =>
-                                                _openFacilityDialog(existing: facility),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.delete_outline, size: 18),
-                                            color: AppColors.danger,
-                                            onPressed: () => _confirmDelete(facility),
-                                          ),
-                                        ],
-                                      )),
-                                    ]),
-                                ],
+                            clipBehavior: Clip.antiAlias,
+                            child: Scrollbar(
+                              controller: _tableScrollController,
+                              thumbVisibility: true,
+                              scrollbarOrientation: ScrollbarOrientation.bottom,
+                              child: LayoutBuilder(
+                                builder: (context, constraints) =>
+                                    SingleChildScrollView(
+                                  controller: _tableScrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minWidth: constraints.maxWidth,
+                                    ),
+                                    child: DataTable(
+                                      columns: const [
+                                        DataColumn(label: Text('#')),
+                                        DataColumn(label: Text('Name')),
+                                        DataColumn(label: Text('Province')),
+                                        DataColumn(label: Text('City/Municipality')),
+                                        DataColumn(label: Text('Mapped')),
+                                        DataColumn(label: Text('Actions')),
+                                      ],
+                                      rows: [
+                                        for (final facility in page.facilities)
+                                          DataRow(cells: [
+                                            DataCell(Text(facility.facilityNumber.toString())),
+                                            DataCell(Text(facility.name)),
+                                            DataCell(Text(facility.province ?? '-')),
+                                            DataCell(Text(facility.cityMunicipality ?? '-')),
+                                            DataCell(
+                                              Icon(
+                                                facility.latitude != null
+                                                    ? Icons.check_circle
+                                                    : Icons.remove_circle_outline,
+                                                size: 18,
+                                                color: facility.latitude != null
+                                                    ? AppColors.success
+                                                    : AppColors.textSecondary,
+                                              ),
+                                            ),
+                                            DataCell(Row(
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit_outlined, size: 18),
+                                                  onPressed: () => _openFacilityDialog(
+                                                    existing: facility,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete_outline, size: 18),
+                                                  color: AppColors.danger,
+                                                  onPressed: () => _confirmDelete(facility),
+                                                ),
+                                              ],
+                                            )),
+                                          ]),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 12,
+                        runSpacing: 8,
                         children: [
                           Text(
                             'Showing ${page.facilities.length} of ${page.total} facilities',

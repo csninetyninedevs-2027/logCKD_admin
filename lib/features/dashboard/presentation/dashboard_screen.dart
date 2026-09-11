@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/admin_page_header.dart';
 import '../../../shared/widgets/admin_reveal.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/widgets/admin_surface.dart';
 import '../../system_status/state/system_status_provider.dart';
 import '../../user_map/state/user_concentration_provider.dart';
@@ -31,7 +32,7 @@ class DashboardScreen extends ConsumerWidget {
         onRefresh: () async => _refreshAll(ref),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(28, 26, 28, 28),
+          padding: AdminResponsive.pageInsets(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -87,6 +88,9 @@ class _DashboardIntroBand extends ConsumerWidget {
           final left = Container(
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
+              borderRadius: compact
+                  ? const BorderRadius.vertical(top: Radius.circular(17))
+                  : const BorderRadius.horizontal(left: Radius.circular(17)),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

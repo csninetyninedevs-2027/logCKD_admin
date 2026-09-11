@@ -532,7 +532,7 @@ class _SignupChart extends StatelessWidget {
       for (var i = 0; i < points.length; i++)
         FlSpot(i.toDouble(), points[i].count.toDouble()),
     ];
-    final labelStep = points.length <= 8
+    final labelStep = points.length <= 12
         ? 1
         : points.length <= 16
             ? 2
@@ -596,10 +596,13 @@ class _SignupChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 30,
+              reservedSize: points.length > 12 ? 40 : 30,
+              interval: 1,
               getTitlesWidget: (value, meta) {
                 final index = value.round();
-                if (index < 0 || index >= points.length) {
+                if ((value - index).abs() > .001 ||
+                    index < 0 ||
+                    index >= points.length) {
                   return const SizedBox.shrink();
                 }
                 if (index % labelStep != 0 && index != points.length - 1) {
@@ -608,7 +611,10 @@ class _SignupChart extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    _shortMonth(points[index].month),
+                    points.length > 12
+                        ? '${_shortMonth(points[index].month)}\n${points[index].month.split('-').first}'
+                        : _shortMonth(points[index].month),
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 8.5,
@@ -644,7 +650,21 @@ class _SignupChart extends StatelessWidget {
             isCurved: true,
             color: AppColors.primaryBright,
             barWidth: 2.4,
-            dotData: FlDotData(show: points.length <= 14),
+            dotData: points.length <= 14
+                ? FlDotData(show: true)
+                : FlDotData(
+                    show: true,
+                    checkToShowDot: (spot, _) {
+                      final index = spot.x.round();
+                      return index % labelStep == 0 ||
+                          index == points.length - 1;
+                    },
+                    getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                      radius: 3,
+                      color: AppColors.primaryBright,
+                      strokeWidth: 0,
+                    ),
+                  ),
             belowBarData: BarAreaData(
               show: true,
               gradient: LinearGradient(

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/admin_page_header.dart';
 import '../../../shared/widgets/admin_reveal.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/widgets/admin_status_badge.dart';
 import '../../../shared/widgets/admin_surface.dart';
 import '../state/users_provider.dart';
@@ -18,10 +19,12 @@ class UserListScreen extends ConsumerStatefulWidget {
 
 class _UserListScreenState extends ConsumerState<UserListScreen> {
   final _searchController = TextEditingController();
+  final _tableScrollController = ScrollController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _tableScrollController.dispose();
     super.dispose();
   }
 
@@ -44,7 +47,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     final params = ref.watch(userListParamsProvider);
 
     return Padding(
-        padding: const EdgeInsets.fromLTRB(28, 26, 28, 24),
+        padding: AdminResponsive.pageInsets(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -55,7 +58,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                 subtitle: 'Search, review, and manage registered log.CKD accounts without leaving the operational console.',
                 actions: [
                   SizedBox(
-                    width: 330,
+                    width: AdminResponsive.actionWidth(context, maxWidth: 330),
                     child: TextField(
                       controller: _searchController,
                       textInputAction: TextInputAction.search,
@@ -120,9 +123,14 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                       const Divider(height: 1),
                                       Expanded(
                                         child: SingleChildScrollView(
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            child: ConstrainedBox(
+                                          child: Scrollbar(
+                                            controller: _tableScrollController,
+                                            thumbVisibility: true,
+                                            scrollbarOrientation: ScrollbarOrientation.bottom,
+                                            child: SingleChildScrollView(
+                                              controller: _tableScrollController,
+                                              scrollDirection: Axis.horizontal,
+                                              child: ConstrainedBox(
                                               constraints: const BoxConstraints(minWidth: 1020),
                                               child: DataTable(
                                                 showCheckboxColumn: false,
@@ -189,6 +197,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                                       ],
                                                     ),
                                                 ],
+                                                ),
                                               ),
                                             ),
                                           ),
