@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/models/system_status.dart';
 import '../state/system_status_provider.dart';
 
@@ -119,7 +120,7 @@ class _SystemStatusScreenState extends ConsumerState<SystemStatusScreen>
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 26, 28, 28),
+      padding: AdminResponsive.pageInsets(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -198,40 +199,36 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'OPERATIONS / REQUEST FLOW',
-                style: TextStyle(
-                  color: AppColors.primaryBright,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 7),
-              Text(
-                'System Status',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Live request health across the log.CKD platform.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+    return AdminResponsiveHeader(
+      heading: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'OPERATIONS / REQUEST FLOW',
+            style: TextStyle(
+              color: AppColors.primaryBright,
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
           ),
-        ),
+          const SizedBox(height: 7),
+          Text(
+            'System Status',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Live request health across the log.CKD platform.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+      actions: [
         _MiniAutoRefresh(
           enabled: autoRefresh,
           onTap: () => onAutoRefreshChanged(!autoRefresh),
         ),
-        const SizedBox(width: 4),
         Tooltip(
           message: 'Refresh now',
           child: IconButton(

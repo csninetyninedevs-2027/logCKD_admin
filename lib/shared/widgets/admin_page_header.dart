@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import 'admin_responsive.dart';
 
 class AdminPageHeader extends StatelessWidget {
   const AdminPageHeader({
@@ -20,7 +21,6 @@ class AdminPageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 760;
         final heading = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -45,26 +45,10 @@ class AdminPageHeader extends StatelessWidget {
           ],
         );
 
-        if (compact || actions.isEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              heading,
-              if (actions.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Wrap(spacing: 10, runSpacing: 10, children: actions),
-              ],
-            ],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: heading),
-            const SizedBox(width: 24),
-            Wrap(spacing: 10, runSpacing: 10, children: actions),
-          ],
+        return AdminResponsiveHeader(
+          breakpoint: AdminBreakpoints.compact,
+          heading: heading,
+          actions: actions,
         );
       },
     );

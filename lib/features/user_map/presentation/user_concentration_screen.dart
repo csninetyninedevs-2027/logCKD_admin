@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:maplibre_gl/maplibre_gl.dart' as ml;
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/user_concentration.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../data/philippine_region_centroids.dart';
 import '../state/user_concentration_provider.dart';
 
@@ -39,7 +42,7 @@ class _UserConcentrationScreenState
     final dataAsync = ref.watch(userConcentrationProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(28, 26, 28, 28),
+      padding: AdminResponsive.pageInsets(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -83,7 +86,9 @@ class _UserConcentrationScreenState
                 0,
                 (total, item) => total + item.data.count,
               );
-              final topRegion = data.regions.isEmpty ? null : data.regions.first;
+              final topRegion = data.regions.isEmpty
+                  ? null
+                  : data.regions.first;
 
               return Column(
                 children: [
@@ -177,41 +182,37 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'MAP / REGIONAL SIGNALS',
-                style: TextStyle(
-                  color: AppColors.primaryBright,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.15,
-                ),
-              ),
-              const SizedBox(height: 7),
-              Text(
-                'User Concentration',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Aggregated user distribution by Philippine region.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+    return AdminResponsiveHeader(
+      heading: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'MAP / REGIONAL SIGNALS',
+            style: TextStyle(
+              color: AppColors.primaryBright,
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.15,
+            ),
           ),
-        ),
+          const SizedBox(height: 7),
+          Text(
+            'User Concentration',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Aggregated user distribution by Philippine region.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+      actions: [
         OutlinedButton.icon(
           onPressed: onReset,
           icon: const Icon(Icons.center_focus_strong_outlined, size: 17),
           label: const Text('Reset view'),
         ),
-        const SizedBox(width: 8),
         IconButton(
           tooltip: 'Refresh',
           onPressed: onRefresh,
@@ -271,17 +272,19 @@ class _SummaryGrid extends StatelessWidget {
         final columns = constraints.maxWidth >= 1050
             ? 4
             : constraints.maxWidth >= 650
-                ? 2
-                : 1;
-        final width =
-            (constraints.maxWidth - gap * (columns - 1)) / columns;
+            ? 2
+            : 1;
+        final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
 
         return Wrap(
           spacing: gap,
           runSpacing: gap,
           children: [
             for (final item in items)
-              SizedBox(width: width, child: _SummaryCard(data: item)),
+              SizedBox(
+                width: width,
+                child: _SummaryCard(data: item),
+              ),
           ],
         );
       },
@@ -395,9 +398,10 @@ class _MapPanel extends StatefulWidget {
 
 class _MapPanelState extends State<_MapPanel> {
   static const LatLng _defaultCenter = LatLng(12.65, 122.15);
-  static const double _defaultZoom = 5.35;
+  static const double _defaultZoom = 6.2;
   static const double _minZoom = 4.9;
   static const double _maxZoom = 13.5;
+  static const double _baseMapZoomOffset = 1;
 
   static final LatLngBounds _panBounds = LatLngBounds(
     const LatLng(2.6, 114.0),
@@ -405,6 +409,7 @@ class _MapPanelState extends State<_MapPanel> {
   );
 
   final MapController _mapController = MapController();
+  ml.MapLibreMapController? _baseMapController;
   double _zoom = _defaultZoom;
   bool _mapReady = false;
 
@@ -419,7 +424,106 @@ class _MapPanelState extends State<_MapPanel> {
   @override
   void dispose() {
     _mapController.dispose();
+    _baseMapController?.dispose();
     super.dispose();
+  }
+
+  void _onBaseMapCreated(ml.MapLibreMapController controller) {
+    _baseMapController = controller;
+    if (_mapReady) {
+      _syncBaseMap(_mapController.camera);
+    }
+  }
+
+  Future<void> _hideMaritimeBoundaries() async {
+    final controller = _baseMapController;
+    if (controller == null) {
+      return;
+    }
+
+    const landBordersOnly = <dynamic>[
+      'all',
+      <dynamic>[
+        '==',
+        <dynamic>['get', 'admin_level'],
+        2,
+      ],
+      <dynamic>[
+        '!=',
+        <dynamic>['get', 'maritime'],
+        1,
+      ],
+    ];
+    const lowZoomLandBordersOnly = <dynamic>[
+      'all',
+      <dynamic>[
+        '==',
+        <dynamic>['get', 'admin_level'],
+        2,
+      ],
+      <dynamic>[
+        '!=',
+        <dynamic>['get', 'maritime'],
+        1,
+      ],
+      <dynamic>[
+        '!',
+        <dynamic>['has', 'claimed_by'],
+      ],
+    ];
+
+    await controller.setFilter('boundary_country_z0-4', lowZoomLandBordersOnly);
+    await controller.setFilter('boundary_country_z5-', landBordersOnly);
+  }
+
+  Future<void> _highlightRoads() async {
+    final controller = _baseMapController;
+    if (controller == null) {
+      return;
+    }
+
+    await Future.wait([
+      controller.setLayerProperties(
+        'highway_motorway_subtle',
+        const ml.LineLayerProperties(lineColor: '#2C7884', lineOpacity: .78),
+      ),
+      controller.setLayerProperties(
+        'highway_motorway_inner',
+        const ml.LineLayerProperties(lineColor: '#3A8995', lineOpacity: .88),
+      ),
+      controller.setLayerProperties(
+        'highway_major_subtle',
+        const ml.LineLayerProperties(lineColor: '#326974', lineOpacity: .68),
+      ),
+      controller.setLayerProperties(
+        'highway_major_inner',
+        const ml.LineLayerProperties(lineColor: '#39727C', lineOpacity: .76),
+      ),
+      controller.setLayerProperties(
+        'highway_minor',
+        const ml.LineLayerProperties(lineColor: '#28545C', lineOpacity: .58),
+      ),
+    ]);
+  }
+
+  Future<void> _configureBaseMapStyle() async {
+    await Future.wait([_hideMaritimeBoundaries(), _highlightRoads()]);
+  }
+
+  void _syncBaseMap(MapCamera camera) {
+    final controller = _baseMapController;
+    if (controller == null) {
+      return;
+    }
+
+    unawaited(
+      controller.moveCamera(
+        ml.CameraUpdate.newLatLngZoom(
+          ml.LatLng(camera.center.latitude, camera.center.longitude),
+          camera.zoom - _baseMapZoomOffset,
+        ),
+      ),
+    );
   }
 
   void _resetMapView() {
@@ -480,6 +584,35 @@ class _MapPanelState extends State<_MapPanel> {
         child: Stack(
           children: [
             Positioned.fill(
+              child: IgnorePointer(
+                child: ml.MapLibreMap(
+                  initialCameraPosition: const ml.CameraPosition(
+                    target: ml.LatLng(12.65, 122.15),
+                    zoom: _defaultZoom - _baseMapZoomOffset,
+                  ),
+                  styleString: 'https://tiles.openfreemap.org/styles/dark',
+                  onMapCreated: _onBaseMapCreated,
+                  onStyleLoadedCallback: () {
+                    unawaited(_configureBaseMapStyle());
+                  },
+                  compassEnabled: false,
+                  rotateGesturesEnabled: false,
+                  scrollGesturesEnabled: false,
+                  zoomGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  doubleClickZoomEnabled: false,
+                  dragEnabled: false,
+                  minMaxZoomPreference: const ml.MinMaxZoomPreference(
+                    _minZoom - _baseMapZoomOffset,
+                    _maxZoom - _baseMapZoomOffset,
+                  ),
+                ),
+              ),
+            ),
+            const Positioned.fill(
+              child: IgnorePointer(child: ColoredBox(color: Color(0x2600A9B8))),
+            ),
+            Positioned.fill(
               child: FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
@@ -487,7 +620,7 @@ class _MapPanelState extends State<_MapPanel> {
                   initialZoom: _defaultZoom,
                   minZoom: _minZoom,
                   maxZoom: _maxZoom,
-                  backgroundColor: const Color(0xFF071116),
+                  backgroundColor: Colors.transparent,
                   cameraConstraint: CameraConstraint.containCenter(
                     bounds: _panBounds,
                   ),
@@ -496,6 +629,7 @@ class _MapPanelState extends State<_MapPanel> {
                   ),
                   onMapReady: () {
                     _mapReady = true;
+                    _syncBaseMap(_mapController.camera);
                     if (mounted) {
                       setState(() {
                         _zoom = _mapController.camera.zoom;
@@ -503,6 +637,7 @@ class _MapPanelState extends State<_MapPanel> {
                     }
                   },
                   onPositionChanged: (camera, hasGesture) {
+                    _syncBaseMap(camera);
                     if (!mounted || (camera.zoom - _zoom).abs() < .01) {
                       return;
                     }
@@ -510,14 +645,6 @@ class _MapPanelState extends State<_MapPanel> {
                   },
                 ),
                 children: [
-                  TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'logckd_admin',
-                    minZoom: _minZoom,
-                    maxZoom: _maxZoom,
-                    maxNativeZoom: 19,
-                    tileBuilder: _darkMapTileBuilder,
-                  ),
                   MarkerLayer(
                     markers: [
                       for (final region in widget.regions)
@@ -599,9 +726,7 @@ class _MapPanelState extends State<_MapPanel> {
               top: 16,
               left: 16,
               child: _MapChip(
-                icon: _zoom < 7
-                    ? Icons.public_rounded
-                    : Icons.route_outlined,
+                icon: _zoom < 7 ? Icons.public_rounded : Icons.route_outlined,
                 text: _zoom < 7
                     ? 'PHILIPPINES / MAP OVERVIEW'
                     : 'PHILIPPINES / LOCAL MAP DETAIL',
@@ -616,11 +741,7 @@ class _MapPanelState extends State<_MapPanel> {
                   totalUsers: widget.totalUsers,
                 ),
               ),
-            const Positioned(
-              left: 20,
-              bottom: 18,
-              child: _MapLegend(),
-            ),
+            const Positioned(left: 20, bottom: 18, child: _MapLegend()),
             Positioned(
               right: 16,
               bottom: 16,
@@ -636,32 +757,6 @@ class _MapPanelState extends State<_MapPanel> {
       ),
     );
   }
-}
-
-Widget _darkMapTileBuilder(
-  BuildContext context,
-  Widget tileWidget,
-  TileImage tile,
-) {
-  return Stack(
-    fit: StackFit.expand,
-    children: [
-      ColorFiltered(
-        colorFilter: const ColorFilter.matrix(<double>[
-          -0.14, -0.28, -0.06, 0, 150,
-          -0.16, -0.32, -0.07, 0, 168,
-          -0.17, -0.34, -0.08, 0, 178,
-          0, 0, 0, 1, 0,
-        ]),
-        child: tileWidget,
-      ),
-      const IgnorePointer(
-        child: ColoredBox(
-          color: Color(0x1600A9B8),
-        ),
-      ),
-    ],
-  );
 }
 
 class _MapRegionMarker extends StatefulWidget {
@@ -741,7 +836,8 @@ class _MapRegionMarkerState extends State<_MapRegionMarker>
     final coreSize = widget.selected ? 29.0 : 23.0;
 
     return Tooltip(
-      message: '${widget.region.data.region}\n${widget.region.data.count} users',
+      message:
+          '${widget.region.data.region}\n${widget.region.data.count} users',
       child: GestureDetector(
         onTap: widget.onTap,
         behavior: HitTestBehavior.opaque,
@@ -750,8 +846,7 @@ class _MapRegionMarkerState extends State<_MapRegionMarker>
           builder: (context, _) {
             final pulse = _pulseController.value;
             final ringScale = .78 + pulse * .82;
-            final ringOpacity =
-                (1 - pulse) * (widget.selected ? .68 : .46);
+            final ringOpacity = (1 - pulse) * (widget.selected ? .68 : .46);
 
             return Stack(
               alignment: Alignment.center,
@@ -789,9 +884,9 @@ class _MapRegionMarkerState extends State<_MapRegionMarker>
                   height: haloSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF081A20).withValues(
-                      alpha: widget.selected ? .94 : .78,
-                    ),
+                    color: const Color(
+                      0xFF081A20,
+                    ).withValues(alpha: widget.selected ? .94 : .78),
                     border: Border.all(
                       color: AppColors.primaryBright.withValues(
                         alpha: widget.selected ? .88 : .42,
@@ -1071,7 +1166,12 @@ class _MapSelectionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _MiniMetric(label: 'Users', value: '${region.data.count}')),
+              Expanded(
+                child: _MiniMetric(
+                  label: 'Users',
+                  value: '${region.data.count}',
+                ),
+              ),
               Expanded(
                 child: _MiniMetric(
                   label: 'Share',
@@ -1133,7 +1233,9 @@ class _RegionListPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selected == null ? 'Regional Distribution' : 'Selected Region',
+                        selected == null
+                            ? 'Regional Distribution'
+                            : 'Selected Region',
                         style: const TextStyle(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w800,
@@ -1153,11 +1255,16 @@ class _RegionListPanel extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: .08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: .14)),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: .14),
+                    ),
                   ),
                   child: Text(
                     '${regions.length} REGIONS',
@@ -1191,7 +1298,9 @@ class _RegionListPanel extends StatelessWidget {
               itemBuilder: (context, index) {
                 final region = regions[index];
                 final mapped = _findMapped(region.region);
-                final percent = totalUsers == 0 ? 0.0 : region.count / totalUsers;
+                final percent = totalUsers == 0
+                    ? 0.0
+                    : region.count / totalUsers;
                 final isSelected = region.region == selectedRegion;
 
                 return Material(
@@ -1343,7 +1452,12 @@ class _SelectedRegionCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _MiniMetric(label: 'Users', value: '${region.data.count}')),
+              Expanded(
+                child: _MiniMetric(
+                  label: 'Users',
+                  value: '${region.data.count}',
+                ),
+              ),
               Expanded(
                 child: _MiniMetric(
                   label: 'Share',

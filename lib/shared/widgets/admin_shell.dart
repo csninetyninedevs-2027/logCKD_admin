@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/admin_motion.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/auth/state/auth_provider.dart';
+import 'admin_responsive.dart';
 
 final adminSidebarCollapsedProvider = StateProvider<bool>((ref) => false);
 
@@ -21,10 +23,26 @@ class AdminShell extends ConsumerWidget {
   static const _destinations = [
     (icon: Icons.grid_view_rounded, label: 'Dashboard', path: '/dashboard'),
     (icon: Icons.people_alt_outlined, label: 'Users', path: '/users'),
-    (icon: Icons.local_hospital_outlined, label: 'Facilities', path: '/facilities'),
-    (icon: Icons.restaurant_menu_rounded, label: 'Food Library', path: '/foods'),
-    (icon: Icons.public_rounded, label: 'User Map', path: '/user-concentration'),
-    (icon: Icons.monitor_heart_outlined, label: 'System', path: '/system-status'),
+    (
+      icon: Icons.local_hospital_outlined,
+      label: 'Facilities',
+      path: '/facilities',
+    ),
+    (
+      icon: Icons.restaurant_menu_rounded,
+      label: 'Food Library',
+      path: '/foods',
+    ),
+    (
+      icon: Icons.public_rounded,
+      label: 'User Map',
+      path: '/user-concentration',
+    ),
+    (
+      icon: Icons.monitor_heart_outlined,
+      label: 'System',
+      path: '/system-status',
+    ),
   ];
 
   @override
@@ -32,44 +50,98 @@ class AdminShell extends ConsumerWidget {
     final admin = ref.watch(authStateProvider).admin;
     final requestedCollapsed = ref.watch(adminSidebarCollapsedProvider);
     final width = MediaQuery.sizeOf(context).width;
-    final forcedCollapsed = width < 980;
+    final compact = width < AdminBreakpoints.compact;
+    final forcedCollapsed = width < AdminBreakpoints.navigation;
     final collapsed = forcedCollapsed || requestedCollapsed;
+
+    void navigate(int index) {
+      context.go(_destinations[index].path);
+    }
+
+    final sidebar = _AdminSidebar(
+      collapsed: collapsed,
+      selectedIndex: selectedIndex,
+      adminName: admin?.name ?? 'Administrator',
+      adminEmail: admin?.email ?? '',
+      adminRole: admin?.role ?? 'admin',
+      destinations: _destinations,
+      onDestinationSelected: navigate,
+      onToggleCollapsed: forcedCollapsed
+          ? null
+          : () {
+              ref.read(adminSidebarCollapsedProvider.notifier).state =
+                  !requestedCollapsed;
+            },
+      onLogout: () => ref.read(authStateProvider.notifier).logout(),
+    );
+
+    final content = Stack(
+      children: [
+        const Positioned.fill(child: _AdminBackdrop()),
+        Positioned.fill(
+          child: SafeArea(left: false, top: !compact, child: child),
+        ),
+      ],
+    );
+
+    if (compact) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          toolbarHeight: 56,
+          titleSpacing: 0,
+          title: const Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'log.',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                TextSpan(
+                  text: 'CKD',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            style: TextStyle(fontSize: 15),
+          ),
+          bottom: const PreferredSize(
+            preferredSize: Size.fromHeight(1),
+            child: Divider(height: 1),
+          ),
+        ),
+        drawer: Drawer(
+          width: 260,
+          backgroundColor: AppColors.sidebar,
+          child: Builder(
+            builder: (drawerContext) => SizedBox.expand(
+              child: _AdminSidebar(
+                collapsed: false,
+                selectedIndex: selectedIndex,
+                adminName: admin?.name ?? 'Administrator',
+                adminEmail: admin?.email ?? '',
+                adminRole: admin?.role ?? 'admin',
+                destinations: _destinations,
+                onDestinationSelected: (index) {
+                  Navigator.of(drawerContext).pop();
+                  navigate(index);
+                },
+                onToggleCollapsed: null,
+                onLogout: () => ref.read(authStateProvider.notifier).logout(),
+              ),
+            ),
+          ),
+        ),
+        body: content,
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Row(
         children: [
-          _AdminSidebar(
-            collapsed: collapsed,
-            selectedIndex: selectedIndex,
-            adminName: admin?.name ?? 'Administrator',
-            adminEmail: admin?.email ?? '',
-            adminRole: admin?.role ?? 'admin',
-            destinations: _destinations,
-            onDestinationSelected: (index) {
-              context.go(_destinations[index].path);
-            },
-            onToggleCollapsed: forcedCollapsed
-                ? null
-                : () {
-                    ref.read(adminSidebarCollapsedProvider.notifier).state =
-                        !requestedCollapsed;
-                  },
-            onLogout: () => ref.read(authStateProvider.notifier).logout(),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                const Positioned.fill(child: _AdminBackdrop()),
-                Positioned.fill(
-                  child: SafeArea(
-                    left: false,
-                    child: child,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          sidebar,
+          Expanded(child: content),
         ],
       ),
     );
@@ -104,75 +176,82 @@ class _AdminSidebar extends StatelessWidget {
     return AnimatedContainer(
       duration: AdminMotion.normal,
       curve: AdminMotion.emphasized,
+      clipBehavior: Clip.hardEdge,
       width: collapsed ? 76 : 244,
       decoration: const BoxDecoration(
         color: AppColors.sidebar,
         border: Border(right: BorderSide(color: AppColors.border)),
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: collapsed ? 8 : 14,
-            vertical: 14,
-          ),
-          child: Column(
-            children: [
-              _Brand(collapsed: collapsed),
-              const SizedBox(height: 26),
-              Expanded(
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: destinations.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 5),
-                  itemBuilder: (context, index) {
-                    final destination = destinations[index];
-                    return _SidebarDestination(
-                      collapsed: collapsed,
-                      selected: selectedIndex == index,
-                      icon: destination.icon,
-                      label: destination.label,
-                      onTap: () => onDestinationSelected(index),
-                    );
-                  },
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final contentCollapsed = constraints.maxWidth < 220;
+
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: contentCollapsed ? 8 : 14,
+                vertical: 14,
               ),
-              _AdminIdentity(
-                collapsed: collapsed,
-                name: adminName,
-                email: adminEmail,
-                role: adminRole,
-              ),
-              const SizedBox(height: 10),
-              if (collapsed)
-                _CollapsedBottomActions(
-                  onLogout: onLogout,
-                  onToggleCollapsed: onToggleCollapsed,
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: _SidebarSmallButton(
-                        icon: Icons.logout_rounded,
-                        label: 'Sign out',
-                        onTap: onLogout,
-                      ),
+              child: Column(
+                children: [
+                  _Brand(collapsed: contentCollapsed),
+                  const SizedBox(height: 26),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: EdgeInsets.zero,
+                      itemCount: destinations.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 5),
+                      itemBuilder: (context, index) {
+                        final destination = destinations[index];
+                        return _SidebarDestination(
+                          collapsed: contentCollapsed,
+                          selected: selectedIndex == index,
+                          icon: destination.icon,
+                          label: destination.label,
+                          onTap: () => onDestinationSelected(index),
+                        );
+                      },
                     ),
-                    if (onToggleCollapsed != null) ...[
-                      const SizedBox(width: 6),
-                      Tooltip(
-                        message: 'Collapse navigation',
-                        child: _CompactIconButton(
-                          onPressed: onToggleCollapsed!,
-                          icon: Icons.keyboard_double_arrow_left_rounded,
+                  ),
+                  _AdminIdentity(
+                    collapsed: contentCollapsed,
+                    name: adminName,
+                    email: adminEmail,
+                    role: adminRole,
+                  ),
+                  const SizedBox(height: 10),
+                  if (contentCollapsed)
+                    _CollapsedBottomActions(
+                      onLogout: onLogout,
+                      onToggleCollapsed: onToggleCollapsed,
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SidebarSmallButton(
+                            icon: Icons.logout_rounded,
+                            label: 'Sign out',
+                            onTap: onLogout,
+                          ),
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-            ],
-          ),
-        ),
+                        if (onToggleCollapsed != null) ...[
+                          const SizedBox(width: 6),
+                          Tooltip(
+                            message: 'Collapse navigation',
+                            child: _CompactIconButton(
+                              onPressed: onToggleCollapsed!,
+                              icon: Icons.keyboard_double_arrow_left_rounded,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -262,65 +341,64 @@ class _Brand extends StatelessWidget {
     return SizedBox(
       height: 46,
       child: Row(
-        mainAxisAlignment:
-            collapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+        mainAxisAlignment: collapsed
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(13),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.primaryBright, AppColors.primaryDark],
+              borderRadius: BorderRadius.circular(11),
+              color: AppColors.primary.withValues(alpha: .07),
+              border: Border.all(
+                color: AppColors.primaryBright.withValues(alpha: .16),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.18),
-                  blurRadius: 20,
-                  spreadRadius: -4,
+                  color: AppColors.primary.withValues(alpha: .12),
+                  blurRadius: 16,
                 ),
               ],
             ),
-            child: const Center(
-              child: Text(
-                'CKD',
-                style: TextStyle(
-                  color: Color(0xFF041315),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.2,
-                ),
-              ),
+            child: Image.asset(
+              'assets/images/log_ckd_mark.png',
+              filterQuality: FilterQuality.high,
             ),
           ),
           if (!collapsed) ...[
-            const SizedBox(width: 11),
-            const Expanded(
+            const SizedBox(width: 10),
+            Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text.rich(
-                    TextSpan(
+                  RichText(
+                    text: TextSpan(
                       children: [
                         TextSpan(
                           text: 'log.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          style: GoogleFonts.simonetta(
+                            color: AppColors.textPrimary,
+                            fontSize: 21,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -.7,
+                          ),
                         ),
                         TextSpan(
                           text: 'CKD',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w800,
+                          style: GoogleFonts.montserrat(
+                            color: AppColors.primaryBright,
+                            fontSize: 21,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -.7,
                           ),
                         ),
                       ],
                     ),
-                    style: TextStyle(fontSize: 15),
                   ),
-                  Text(
+                  const Text(
                     'ADMIN CONSOLE',
                     style: TextStyle(
                       color: AppColors.primaryBright,
@@ -378,8 +456,8 @@ class _SidebarDestinationState extends State<_SidebarDestination> {
           color: active
               ? AppColors.sidebarActive
               : _hovered
-                  ? AppColors.surface.withValues(alpha: 0.7)
-                  : Colors.transparent,
+              ? AppColors.surface.withValues(alpha: 0.7)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: active
@@ -576,17 +654,18 @@ class _AdminBackdropPainter extends CustomPainter {
     }
 
     final tealGlow = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.primary.withValues(alpha: 0.11),
-          AppColors.primary.withValues(alpha: 0),
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width * 0.88, size.height * 0.08),
-          radius: 330,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.primary.withValues(alpha: 0.11),
+              AppColors.primary.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.88, size.height * 0.08),
+              radius: 330,
+            ),
+          );
     canvas.drawCircle(
       Offset(size.width * 0.88, size.height * 0.08),
       330,
@@ -594,17 +673,18 @@ class _AdminBackdropPainter extends CustomPainter {
     );
 
     final coralGlow = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.coral.withValues(alpha: 0.045),
-          AppColors.coral.withValues(alpha: 0),
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width * 0.18, size.height * 0.96),
-          radius: 280,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.coral.withValues(alpha: 0.045),
+              AppColors.coral.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.18, size.height * 0.96),
+              radius: 280,
+            ),
+          );
     canvas.drawCircle(
       Offset(size.width * 0.18, size.height * 0.96),
       280,

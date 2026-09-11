@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/admin_food.dart';
 import '../../../shared/utils/admin_input_validation.dart';
+import '../../../shared/widgets/admin_responsive.dart';
 import '../state/food_provider.dart';
 
 class FoodListScreen extends ConsumerStatefulWidget {
@@ -22,10 +23,13 @@ class _FoodListScreenState
     extends ConsumerState<FoodListScreen> {
   final _searchController =
       TextEditingController();
+  final _tableScrollController =
+      ScrollController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _tableScrollController.dispose();
     super.dispose();
   }
 
@@ -276,15 +280,13 @@ class _FoodListScreenState
 
     return Padding(
         padding:
-            const EdgeInsets.all(24),
+            AdminResponsive.pageInsets(context),
         child: Column(
           crossAxisAlignment:
               CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
+            AdminResponsiveHeader(
+              heading: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
@@ -308,7 +310,7 @@ class _FoodListScreenState
                       ),
                     ],
                   ),
-                ),
+              actions: [
                 OutlinedButton.icon(
                   onPressed:
                       actionState.isLoading
@@ -319,9 +321,6 @@ class _FoodListScreenState
                   ),
                   label:
                       const Text('Bulk JSON'),
-                ),
-                const SizedBox(
-                  width: 10,
                 ),
                 ElevatedButton.icon(
                   onPressed:
@@ -345,10 +344,17 @@ class _FoodListScreenState
               child: Padding(
                 padding:
                     const EdgeInsets.all(14),
-                child: Row(
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     SizedBox(
-                      width: 340,
+                      width: AdminResponsive.actionWidth(
+                        context,
+                        maxWidth: 340,
+                        additionalInsets: 28,
+                      ),
                       child: TextField(
                         controller:
                             _searchController,
@@ -375,11 +381,12 @@ class _FoodListScreenState
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 12,
-                    ),
                     SizedBox(
-                      width: 220,
+                      width: AdminResponsive.actionWidth(
+                        context,
+                        maxWidth: 220,
+                        additionalInsets: 28,
+                      ),
                       child:
                           DropdownButtonFormField<
                               String>(
@@ -450,9 +457,6 @@ class _FoodListScreenState
                         },
                       ),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
                     OutlinedButton.icon(
                       onPressed:
                           _clearFilters,
@@ -464,7 +468,6 @@ class _FoodListScreenState
                         'Clear',
                       ),
                     ),
-                    const Spacer(),
                     IconButton(
                       tooltip: 'Refresh',
                       onPressed: () {
@@ -574,12 +577,21 @@ class _FoodListScreenState
                           child: Card(
                             clipBehavior:
                                 Clip.antiAlias,
-                            child:
-                                SingleChildScrollView(
-                              scrollDirection:
-                                  Axis.horizontal,
+                            child: Scrollbar(
+                              controller:
+                                  _tableScrollController,
+                              thumbVisibility:
+                                  true,
+                              scrollbarOrientation:
+                                  ScrollbarOrientation.bottom,
                               child:
-                                  DataTable(
+                                  SingleChildScrollView(
+                                controller:
+                                    _tableScrollController,
+                                scrollDirection:
+                                    Axis.horizontal,
+                                child:
+                                    DataTable(
                                 columns:
                                     const [
                                   DataColumn(
@@ -757,11 +769,12 @@ class _FoodListScreenState
                                       ],
                                     ),
                                 ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
                       const SizedBox(
                         height: 12,
                       ),
