@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/facility.dart';
 import '../../../shared/utils/admin_input_validation.dart';
 import '../../../shared/widgets/admin_responsive.dart';
+import '../../../shared/widgets/facility_list_skeleton.dart';
 import '../state/facility_provider.dart';
 
 class FacilityListScreen extends ConsumerStatefulWidget {
@@ -128,7 +129,7 @@ class _FacilityListScreenState extends ConsumerState<FacilityListScreen> {
             const SizedBox(height: 20),
             Expanded(
               child: facilitiesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const FacilityListSkeleton(),
                 error: (error, _) => Center(child: Text('Failed to load facilities: $error')),
                 data: (page) {
                   if (page.facilities.isEmpty) {

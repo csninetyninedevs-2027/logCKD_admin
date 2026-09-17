@@ -10,6 +10,7 @@ import '../../../../shared/models/user_concentration.dart';
 import '../../../system_status/state/system_status_provider.dart';
 import '../../../user_map/state/user_concentration_provider.dart';
 import '../../state/dashboard_provider.dart';
+import '../../../../shared/widgets/dashboard_skeleton.dart';
 
 class DashboardOverviewSection
     extends ConsumerWidget {
@@ -48,9 +49,7 @@ class DashboardOverviewSection
       children: [
         summaryAsync.when(
           loading: () =>
-              const _LoadingBox(
-            height: 110,
-          ),
+              const DashboardTopSkeleton(),
           error: (
             error,
             stackTrace,
@@ -135,7 +134,7 @@ class DashboardOverviewSection
                         systemAsync
                             .when(
                       loading: () =>
-                          const _PanelLoading(),
+                          const DashboardPanelSkeleton(),
                       error: (
                         error,
                         stackTrace,
@@ -180,7 +179,7 @@ class DashboardOverviewSection
                         foodAsync
                             .when(
                       loading: () =>
-                          const _PanelLoading(),
+                          const DashboardPanelSkeleton(),
                       error: (
                         error,
                         stackTrace,
@@ -225,7 +224,7 @@ class DashboardOverviewSection
                         concentrationAsync
                             .when(
                       loading: () =>
-                          const _PanelLoading(),
+                          const DashboardPanelSkeleton(),
                       error: (
                         error,
                         stackTrace,

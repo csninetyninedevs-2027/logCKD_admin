@@ -8,7 +8,9 @@ import '../../../shared/widgets/admin_reveal.dart';
 import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/widgets/admin_status_badge.dart';
 import '../../../shared/widgets/admin_surface.dart';
+import '../../../shared/widgets/user_list_skeleton.dart';
 import '../state/users_provider.dart';
+
 
 class UserListScreen extends ConsumerStatefulWidget {
   const UserListScreen({super.key});
@@ -86,7 +88,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
             const SizedBox(height: 22),
             Expanded(
               child: usersAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const UserListSkeleton(),
                 error: (error, _) => _UsersError(
                   message: 'Failed to load users: $error',
                   onRetry: () => ref.invalidate(userListProvider),
