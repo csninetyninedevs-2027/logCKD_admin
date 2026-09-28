@@ -19,7 +19,7 @@ class UserListParams {
   }
 }
 
-final userListParamsProvider = StateProvider<UserListParams>((ref) {
+final userListParamsProvider = StateProvider.autoDispose<UserListParams>((ref) {
   return const UserListParams();
 });
 

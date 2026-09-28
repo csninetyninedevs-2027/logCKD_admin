@@ -19,7 +19,7 @@ class FacilityListParams {
   }
 }
 
-final facilityListParamsProvider = StateProvider<FacilityListParams>((ref) {
+final facilityListParamsProvider = StateProvider.autoDispose<FacilityListParams>((ref) {
   return const FacilityListParams();
 });
 

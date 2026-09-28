@@ -32,7 +32,7 @@ class FoodListParams {
 }
 
 final foodListParamsProvider =
-    StateProvider<FoodListParams>((ref) {
+    StateProvider.autoDispose<FoodListParams>((ref) {
   return const FoodListParams();
 });
 

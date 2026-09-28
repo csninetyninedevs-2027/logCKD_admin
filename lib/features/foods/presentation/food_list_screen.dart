@@ -567,6 +567,7 @@ class _FoodListScreenState
                   }
 
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
                         child:
@@ -581,14 +582,19 @@ class _FoodListScreenState
                                   true,
                               scrollbarOrientation:
                                   ScrollbarOrientation.bottom,
-                              child:
-                                  SingleChildScrollView(
-                                controller:
-                                    _tableScrollController,
-                                scrollDirection:
-                                    Axis.horizontal,
-                                child:
-                                    DataTable(
+                              child: LayoutBuilder(
+                                builder: (context, constraints) =>
+                                    SingleChildScrollView(
+                                  controller:
+                                      _tableScrollController,
+                                  scrollDirection:
+                                      Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minWidth: constraints.maxWidth,
+                                    ),
+                                    child:
+                                        DataTable(
                                 columns:
                                     const [
                                   DataColumn(
@@ -767,11 +773,13 @@ class _FoodListScreenState
                                     ),
                                 ],
                                   ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
+                      ),
                       const SizedBox(
                         height: 12,
                       ),

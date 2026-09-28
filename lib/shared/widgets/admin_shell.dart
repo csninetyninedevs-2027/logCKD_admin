@@ -90,20 +90,29 @@ class AdminShell extends ConsumerWidget {
         appBar: AppBar(
           toolbarHeight: 56,
           titleSpacing: 0,
-          title: const Text.rich(
-            TextSpan(
+          title: RichText(
+            text: TextSpan(
               children: [
                 TextSpan(
                   text: 'log.',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: GoogleFonts.simonetta(
+                    color: AppColors.textPrimary,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -.7,
+                  ),
                 ),
                 TextSpan(
                   text: 'CKD',
-                  style: TextStyle(fontWeight: FontWeight.w800),
+                  style: GoogleFonts.montserrat(
+                    color: AppColors.primaryBright,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -.7,
+                  ),
                 ),
               ],
             ),
-            style: TextStyle(fontSize: 15),
           ),
           bottom: const PreferredSize(
             preferredSize: Size.fromHeight(1),

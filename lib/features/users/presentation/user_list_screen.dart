@@ -124,17 +124,23 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                       _TableHeader(search: params.search),
                                       const Divider(height: 1),
                                       Expanded(
-                                        child: SingleChildScrollView(
-                                          child: Scrollbar(
-                                            controller: _tableScrollController,
-                                            thumbVisibility: true,
-                                            scrollbarOrientation: ScrollbarOrientation.bottom,
-                                            child: SingleChildScrollView(
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) =>
+                                              SingleChildScrollView(
+                                            child: Scrollbar(
                                               controller: _tableScrollController,
-                                              scrollDirection: Axis.horizontal,
-                                              child: ConstrainedBox(
-                                              constraints: const BoxConstraints(minWidth: 1020),
-                                              child: DataTable(
+                                              thumbVisibility: true,
+                                              scrollbarOrientation: ScrollbarOrientation.bottom,
+                                              child: SingleChildScrollView(
+                                                controller: _tableScrollController,
+                                                scrollDirection: Axis.horizontal,
+                                                child: ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                  minWidth: constraints.maxWidth > 1020
+                                                      ? constraints.maxWidth
+                                                      : 1020,
+                                                ),
+                                                child: DataTable(
                                                 showCheckboxColumn: false,
                                                 horizontalMargin: 18,
                                                 columnSpacing: 28,
@@ -199,6 +205,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                                       ],
                                                     ),
                                                 ],
+                                                  ),
                                                 ),
                                               ),
                                             ),

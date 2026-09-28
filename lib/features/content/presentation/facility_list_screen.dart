@@ -229,7 +229,9 @@ class _FacilityListScreenState extends ConsumerState<FacilityListScreen> {
                                         .update((s) => s.copyWith(page: s.page - 1))
                                     : null,
                               ),
-                              Text('Page ${page.page}'),
+                              Text(
+                                'Page ${page.page} of ${(page.total + page.limit - 1) ~/ page.limit}',
+                              ),
                               IconButton(
                                 icon: const Icon(Icons.chevron_right),
                                 onPressed: page.page * page.limit < page.total
