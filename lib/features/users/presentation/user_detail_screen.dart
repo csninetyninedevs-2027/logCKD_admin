@@ -8,6 +8,7 @@ import '../../../shared/widgets/admin_reveal.dart';
 import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/widgets/admin_status_badge.dart';
 import '../../../shared/widgets/admin_surface.dart';
+import '../../../shared/widgets/user_detail_skeleton.dart';
 import '../state/users_provider.dart';
 
 class UserDetailScreen extends ConsumerWidget {
@@ -91,7 +92,7 @@ class UserDetailScreen extends ConsumerWidget {
             const SizedBox(height: 22),
             Expanded(
               child: detailAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const UserDetailSkeleton(),
                 error: (error, _) => Center(
                   child: AdminSurface(
                     child: Column(

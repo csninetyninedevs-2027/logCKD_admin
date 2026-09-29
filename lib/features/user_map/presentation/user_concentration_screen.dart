@@ -10,6 +10,7 @@ import 'package:maplibre_gl/maplibre_gl.dart' as ml;
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/user_concentration.dart';
 import '../../../shared/widgets/admin_responsive.dart';
+import '../../../shared/widgets/user_concentration_skeleton.dart';
 import '../data/philippine_region_centroids.dart';
 import '../state/user_concentration_provider.dart';
 
@@ -52,10 +53,7 @@ class _UserConcentrationScreenState
           ),
           const SizedBox(height: 20),
           dataAsync.when(
-            loading: () => const SizedBox(
-              height: 560,
-              child: Center(child: CircularProgressIndicator()),
-            ),
+            loading: () => const UserConcentrationSkeleton(),
             error: (error, _) => _ErrorView(
               message: error.toString(),
               onRetry: () => ref.invalidate(userConcentrationProvider),

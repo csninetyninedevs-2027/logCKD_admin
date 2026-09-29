@@ -8,7 +8,9 @@ import '../../../shared/widgets/admin_reveal.dart';
 import '../../../shared/widgets/admin_responsive.dart';
 import '../../../shared/widgets/admin_status_badge.dart';
 import '../../../shared/widgets/admin_surface.dart';
+import '../../../shared/widgets/user_list_skeleton.dart';
 import '../state/users_provider.dart';
+
 
 class UserListScreen extends ConsumerStatefulWidget {
   const UserListScreen({super.key});
@@ -86,7 +88,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
             const SizedBox(height: 22),
             Expanded(
               child: usersAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const UserListSkeleton(),
                 error: (error, _) => _UsersError(
                   message: 'Failed to load users: $error',
                   onRetry: () => ref.invalidate(userListProvider),
@@ -122,17 +124,23 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                       _TableHeader(search: params.search),
                                       const Divider(height: 1),
                                       Expanded(
-                                        child: SingleChildScrollView(
-                                          child: Scrollbar(
-                                            controller: _tableScrollController,
-                                            thumbVisibility: true,
-                                            scrollbarOrientation: ScrollbarOrientation.bottom,
-                                            child: SingleChildScrollView(
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) =>
+                                              SingleChildScrollView(
+                                            child: Scrollbar(
                                               controller: _tableScrollController,
-                                              scrollDirection: Axis.horizontal,
-                                              child: ConstrainedBox(
-                                              constraints: const BoxConstraints(minWidth: 1020),
-                                              child: DataTable(
+                                              thumbVisibility: true,
+                                              scrollbarOrientation: ScrollbarOrientation.bottom,
+                                              child: SingleChildScrollView(
+                                                controller: _tableScrollController,
+                                                scrollDirection: Axis.horizontal,
+                                                child: ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                  minWidth: constraints.maxWidth > 1020
+                                                      ? constraints.maxWidth
+                                                      : 1020,
+                                                ),
+                                                child: DataTable(
                                                 showCheckboxColumn: false,
                                                 horizontalMargin: 18,
                                                 columnSpacing: 28,
@@ -197,6 +205,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                                       ],
                                                     ),
                                                 ],
+                                                  ),
                                                 ),
                                               ),
                                             ),

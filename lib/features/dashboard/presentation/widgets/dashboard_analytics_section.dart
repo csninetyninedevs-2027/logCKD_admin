@@ -9,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/analytics_extras.dart';
 import '../../../../shared/models/demographics.dart';
 import '../../state/dashboard_provider.dart';
+import '../../../../shared/widgets/dashboard_skeleton.dart';
 
 class DashboardAnalyticsSection extends ConsumerWidget {
   const DashboardAnalyticsSection({super.key});
@@ -72,7 +73,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                       },
                     ),
                     child: signupAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(signupTrendProvider(months)),
                       ),
@@ -90,7 +91,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                     subtitle: 'Latest assessment category per assessed user',
                     accent: AppColors.coral,
                     child: riskAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(riskDistributionProvider),
                       ),
@@ -105,7 +106,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                     subtitle: 'Registered users grouped into backend age bands',
                     accent: AppColors.softBlue,
                     child: demographicsAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(demographicsProvider),
                       ),
@@ -128,7 +129,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                     subtitle: 'User distribution by recorded sex',
                     accent: AppColors.primary,
                     child: demographicsAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(demographicsProvider),
                       ),
@@ -151,7 +152,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                     subtitle: 'Recorded CKD stage values',
                     accent: AppColors.warning,
                     child: demographicsAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(demographicsProvider),
                       ),
@@ -174,7 +175,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                     subtitle: 'Recorded health and family-history factors',
                     accent: AppColors.coral,
                     child: demographicsAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(demographicsProvider),
                       ),
@@ -200,7 +201,7 @@ class DashboardAnalyticsSection extends ConsumerWidget {
                     subtitle: 'Current user health-status values',
                     accent: AppColors.success,
                     child: summaryAsync.when(
-                      loading: () => const _LoadingChart(),
+                      loading: () => const DashboardChartSkeleton(),
                       error: (_, _) => _ErrorChart(
                         onRetry: () => ref.invalidate(dashboardSummaryProvider),
                       ),

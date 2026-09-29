@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/admin_responsive.dart';
+import '../../../shared/widgets/system_status_skeleton.dart';
 import '../../../shared/models/system_status.dart';
 import '../state/system_status_provider.dart';
 
@@ -32,6 +33,17 @@ class _SystemStatusScreenState extends ConsumerState<SystemStatusScreen>
   @override
   void initState() {
     super.initState();
+
+    // Force a fresh status request whenever this screen is entered.
+    // This ensures the loading skeleton is shown even when navigating
+    // directly from Dashboard.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      ref.invalidate(systemStatusProvider);
+    });
 
     _flowController = AnimationController(
       vsync: this,
@@ -132,9 +144,7 @@ class _SystemStatusScreenState extends ConsumerState<SystemStatusScreen>
           const SizedBox(height: 16),
           Expanded(
             child: statusAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const SystemStatusSkeleton(),
               error: (error, _) => _ErrorState(
                 message: systemStatusErrorMessage(error),
                 onRetry: _triggerRefresh,

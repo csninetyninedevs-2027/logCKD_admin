@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/admin_food.dart';
 import '../../../shared/utils/admin_input_validation.dart';
 import '../../../shared/widgets/admin_responsive.dart';
+import '../../../shared/widgets/food_list_skeleton.dart';
 import '../state/food_provider.dart';
 
 class FoodListScreen extends ConsumerStatefulWidget {
@@ -488,11 +489,7 @@ class _FoodListScreenState
             ),
             Expanded(
               child: foodsAsync.when(
-                loading: () =>
-                    const Center(
-                  child:
-                      CircularProgressIndicator(),
-                ),
+                loading: () => const FoodListSkeleton(),
                 error: (
                   error,
                   stackTrace,
@@ -570,6 +567,7 @@ class _FoodListScreenState
                   }
 
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
                         child:
@@ -584,14 +582,19 @@ class _FoodListScreenState
                                   true,
                               scrollbarOrientation:
                                   ScrollbarOrientation.bottom,
-                              child:
-                                  SingleChildScrollView(
-                                controller:
-                                    _tableScrollController,
-                                scrollDirection:
-                                    Axis.horizontal,
-                                child:
-                                    DataTable(
+                              child: LayoutBuilder(
+                                builder: (context, constraints) =>
+                                    SingleChildScrollView(
+                                  controller:
+                                      _tableScrollController,
+                                  scrollDirection:
+                                      Axis.horizontal,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minWidth: constraints.maxWidth,
+                                    ),
+                                    child:
+                                        DataTable(
                                 columns:
                                     const [
                                   DataColumn(
@@ -770,11 +773,13 @@ class _FoodListScreenState
                                     ),
                                 ],
                                   ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
+                      ),
                       const SizedBox(
                         height: 12,
                       ),
