@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/training_dataset_model.dart';
+import '../../../../shared/widgets/research_training_data_skeleton.dart';
 import '../../services/training_dataset_admin_service.dart';
 import '../../state/training_dataset_admin_provider.dart';
 
@@ -450,13 +451,8 @@ class _TrainingDataScreenState
         const _WorkflowCard(),
         const SizedBox(height: 18),
         datasets.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(40),
-              child:
-                  CircularProgressIndicator(),
-            ),
-          ),
+          loading: () =>
+              const ResearchTrainingDataSkeleton(),
           error: (error, _) =>
               _ErrorCard(
             message:

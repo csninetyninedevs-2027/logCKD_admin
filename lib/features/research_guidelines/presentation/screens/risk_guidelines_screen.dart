@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/risk_guideline_model.dart';
+import '../../../../shared/widgets/admin_skeleton.dart';
 import '../../state/risk_guideline_admin_provider.dart';
 
 class RiskGuidelinesScreen extends ConsumerStatefulWidget {
@@ -2426,9 +2427,7 @@ class _PublishedLoadingCard
 
   @override
   Widget build(BuildContext context) {
-    return const _LoadingCard(
-      height: 180,
-    );
+    return const _RiskPublishedSkeleton();
   }
 }
 
@@ -2440,44 +2439,278 @@ class _VersionListLoading
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        _LoadingCard(height: 90),
+        _RiskVersionSkeleton(),
         SizedBox(height: 10),
-        _LoadingCard(height: 90),
+        _RiskVersionSkeleton(),
         SizedBox(height: 10),
-        _LoadingCard(height: 90),
+        _RiskVersionSkeleton(),
       ],
     );
   }
 }
 
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard({
-    required this.height,
-  });
-
-  final double height;
+class _RiskPublishedSkeleton
+    extends StatelessWidget {
+  const _RiskPublishedSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.surface
-            .withValues(alpha: .45),
-        borderRadius:
-            BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.border,
+    return AdminSkeleton(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(
+            alpha: .08,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primaryBright
+                .withValues(alpha: .14),
+          ),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact =
+                constraints.maxWidth < 700;
+
+            const information = Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    AdminSkeletonBox(
+                      width: 42,
+                      height: 42,
+                      radius: 12,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          AdminSkeletonBox(
+                            width: 112,
+                            height: 8,
+                            radius: 4,
+                          ),
+                          SizedBox(height: 7),
+                          AdminSkeletonBox(
+                            width: 205,
+                            height: 15,
+                            radius: 7,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 17),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    AdminSkeletonBox(
+                      width: 92,
+                      height: 27,
+                      radius: 9,
+                    ),
+                    AdminSkeletonBox(
+                      width: 76,
+                      height: 27,
+                      radius: 14,
+                    ),
+                    AdminSkeletonBox(
+                      width: 118,
+                      height: 27,
+                      radius: 9,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 14),
+                AdminSkeletonBox(
+                  width: 360,
+                  height: 10,
+                  radius: 5,
+                ),
+              ],
+            );
+
+            const actions = Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                AdminSkeletonBox(
+                  width: 112,
+                  height: 36,
+                  radius: 9,
+                ),
+                AdminSkeletonBox(
+                  width: 148,
+                  height: 36,
+                  radius: 9,
+                ),
+              ],
+            );
+
+            if (compact) {
+              return const Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  information,
+                  SizedBox(height: 18),
+                  actions,
+                ],
+              );
+            }
+
+            return const Row(
+              crossAxisAlignment:
+                  CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: information,
+                ),
+                SizedBox(width: 20),
+                actions,
+              ],
+            );
+          },
         ),
       ),
-      child: const Center(
-        child: SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
+    );
+  }
+}
+
+class _RiskVersionSkeleton
+    extends StatelessWidget {
+  const _RiskVersionSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return AdminSkeleton(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(17),
+        decoration: BoxDecoration(
+          color: AppColors.surface.withValues(
+            alpha: .62,
           ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.border,
+          ),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact =
+                constraints.maxWidth < 760;
+
+            const details = Row(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                AdminSkeletonBox(
+                  width: 39,
+                  height: 39,
+                  radius: 11,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          AdminSkeletonBox(
+                            width: 160,
+                            height: 13,
+                            radius: 6,
+                          ),
+                          SizedBox(width: 8),
+                          AdminSkeletonBox(
+                            width: 68,
+                            height: 20,
+                            radius: 10,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 9),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 5,
+                        children: [
+                          AdminSkeletonBox(
+                            width: 72,
+                            height: 9,
+                            radius: 4,
+                          ),
+                          AdminSkeletonBox(
+                            width: 96,
+                            height: 9,
+                            radius: 4,
+                          ),
+                          AdminSkeletonBox(
+                            width: 118,
+                            height: 9,
+                            radius: 4,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+
+            const actions = Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                AdminSkeletonBox(
+                  width: 66,
+                  height: 34,
+                  radius: 9,
+                ),
+                AdminSkeletonBox(
+                  width: 72,
+                  height: 34,
+                  radius: 9,
+                ),
+                AdminSkeletonBox(
+                  width: 86,
+                  height: 34,
+                  radius: 9,
+                ),
+              ],
+            );
+
+            if (compact) {
+              return const Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  details,
+                  SizedBox(height: 14),
+                  actions,
+                ],
+              );
+            }
+
+            return const Row(
+              children: [
+                Expanded(
+                  child: details,
+                ),
+                SizedBox(width: 16),
+                actions,
+              ],
+            );
+          },
         ),
       ),
     );

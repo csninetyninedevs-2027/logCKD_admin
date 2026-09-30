@@ -87,58 +87,68 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                     ),
                   )
-                : Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 54,
-                        vertical: 36,
-                      ),
+                : LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1580),
-                        child: SizedBox(
-                          height: (size.height - 72)
-                              .clamp(650.0, 860.0)
-                              .toDouble(),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                flex: 7,
-                                child: Stack(
-                                  children: const [
-                                    Positioned(
-                                      left: 0,
-                                      top: 0,
-                                      child: _LogCkdWordmark(),
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 54,
+                              vertical: 36,
+                            ),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1580),
+                              child: SizedBox(
+                                height: (size.height - 72)
+                                    .clamp(650.0, 860.0)
+                                    .toDouble(),
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      flex: 7,
+                                      child: Stack(
+                                        children: const [
+                                          Positioned(
+                                            left: 0,
+                                            top: 0,
+                                            child: _LogCkdWordmark(),
+                                          ),
+                                          Positioned(
+                                            left: 8,
+                                            right: 0,
+                                            top: 42,
+                                            bottom: 124,
+                                            child: AdminLoginHero(),
+                                          ),
+                                          Positioned(
+                                            left: 0,
+                                            right: 36,
+                                            bottom: 48,
+                                            child: _LoginStatement(),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    Positioned(
-                                      left: 8,
-                                      right: 0,
-                                      top: 42,
-                                      bottom: 124,
-                                      child: AdminLoginHero(),
-                                    ),
-                                    Positioned(
-                                      left: 0,
-                                      right: 36,
-                                      bottom: 48,
-                                      child: _LoginStatement(),
+                                    const SizedBox(width: 42),
+                                    Expanded(
+                                      flex: 4,
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: Transform.translate(
+                                          offset: const Offset(0, 210),
+                                          child: _buildForm(authState),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 42),
-                              Expanded(
-                                flex: 4,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Transform.translate(
-                                    offset: const Offset(0, 210),
-                                    child: _buildForm(authState),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
