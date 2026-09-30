@@ -32,50 +32,73 @@ class FoodListSkeleton extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: const Row(
-                      children: [
-                        AdminSkeletonBox(
-                          width: 220,
-                          height: 12,
-                          radius: 6,
-                        ),
-                        SizedBox(width: 24),
-                        AdminSkeletonBox(
-                          width: 110,
-                          height: 12,
-                          radius: 6,
-                        ),
-                        Spacer(),
-                        AdminSkeletonBox(
-                          width: 70,
-                          height: 12,
-                          radius: 6,
-                        ),
-                        SizedBox(width: 24),
-                        AdminSkeletonBox(
-                          width: 70,
-                          height: 12,
-                          radius: 6,
-                        ),
-                        SizedBox(width: 24),
-                        AdminSkeletonBox(
-                          width: 80,
-                          height: 12,
-                          radius: 6,
-                        ),
-                        SizedBox(width: 24),
-                        AdminSkeletonBox(
-                          width: 65,
-                          height: 12,
-                          radius: 6,
-                        ),
-                        SizedBox(width: 24),
-                        AdminSkeletonBox(
-                          width: 70,
-                          height: 12,
-                          radius: 6,
-                        ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const baseWidth = 805.0;
+
+                        final widthScale =
+                            (constraints.maxWidth / baseWidth)
+                                .clamp(0.0, 1.0);
+
+                        double w(double value) =>
+                            value * widthScale;
+
+                        return Row(
+                          children: [
+                            AdminSkeletonBox(
+                              width: w(220),
+                              height: 12,
+                              radius: 6,
+                            ),
+                            SizedBox(
+                              width: w(24),
+                            ),
+                            AdminSkeletonBox(
+                              width: w(110),
+                              height: 12,
+                              radius: 6,
+                            ),
+                            const Spacer(),
+                            AdminSkeletonBox(
+                              width: w(70),
+                              height: 12,
+                              radius: 6,
+                            ),
+                            SizedBox(
+                              width: w(24),
+                            ),
+                            AdminSkeletonBox(
+                              width: w(70),
+                              height: 12,
+                              radius: 6,
+                            ),
+                            SizedBox(
+                              width: w(24),
+                            ),
+                            AdminSkeletonBox(
+                              width: w(80),
+                              height: 12,
+                              radius: 6,
+                            ),
+                            SizedBox(
+                              width: w(24),
+                            ),
+                            AdminSkeletonBox(
+                              width: w(65),
+                              height: 12,
+                              radius: 6,
+                            ),
+                            SizedBox(
+                              width: w(24),
+                            ),
+                            AdminSkeletonBox(
+                              width: w(70),
+                              height: 12,
+                              radius: 6,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   Expanded(
@@ -85,16 +108,22 @@ class FoodListSkeleton extends StatelessWidget {
                         vertical: 8,
                       ),
                       itemCount: 9,
-                      separatorBuilder: (_, index) => Divider(
+                      separatorBuilder: (_, index) =>
+                          Divider(
                         height: 1,
                         color: AppColors.border,
                       ),
-                      itemBuilder: (context, index) {
+                      itemBuilder: (
+                        context,
+                        index,
+                      ) {
                         return const Padding(
-                          padding: EdgeInsets.symmetric(
+                          padding:
+                              EdgeInsets.symmetric(
                             vertical: 15,
                           ),
-                          child: _FoodSkeletonRow(),
+                          child:
+                              _FoodSkeletonRow(),
                         );
                       },
                     ),
@@ -104,7 +133,9 @@ class FoodListSkeleton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(
+          height: 12,
+        ),
         const _FoodPaginationSkeleton(),
       ],
     );
@@ -116,93 +147,136 @@ class _FoodSkeletonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const AdminSkeletonBox(
-          width: 280,
-          height: 14,
-          radius: 7,
-        ),
-        const SizedBox(width: 20),
-        const AdminSkeletonBox(
-          width: 150,
-          height: 14,
-          radius: 7,
-        ),
-        const Spacer(),
-        const AdminSkeletonBox(
-          width: 82,
-          height: 14,
-          radius: 7,
-        ),
-        const SizedBox(width: 28),
-        const AdminSkeletonBox(
-          width: 82,
-          height: 14,
-          radius: 7,
-        ),
-        const SizedBox(width: 28),
-        const AdminSkeletonBox(
-          width: 78,
-          height: 24,
-          radius: 12,
-        ),
-        const SizedBox(width: 28),
-        const AdminSkeletonBox(
-          width: 70,
-          height: 24,
-          radius: 12,
-        ),
-        const SizedBox(width: 28),
-        const AdminSkeletonBox(
-          width: 92,
-          height: 28,
-          radius: 8,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const baseWidth = 966.0;
+
+        final widthScale =
+            (constraints.maxWidth / baseWidth)
+                .clamp(0.0, 1.0);
+
+        double w(double value) =>
+            value * widthScale;
+
+        return Row(
+          children: [
+            AdminSkeletonBox(
+              width: w(280),
+              height: 14,
+              radius: 7,
+            ),
+            SizedBox(
+              width: w(20),
+            ),
+            AdminSkeletonBox(
+              width: w(150),
+              height: 14,
+              radius: 7,
+            ),
+            const Spacer(),
+            AdminSkeletonBox(
+              width: w(82),
+              height: 14,
+              radius: 7,
+            ),
+            SizedBox(
+              width: w(28),
+            ),
+            AdminSkeletonBox(
+              width: w(82),
+              height: 14,
+              radius: 7,
+            ),
+            SizedBox(
+              width: w(28),
+            ),
+            AdminSkeletonBox(
+              width: w(78),
+              height: 24,
+              radius: 12,
+            ),
+            SizedBox(
+              width: w(28),
+            ),
+            AdminSkeletonBox(
+              width: w(70),
+              height: 24,
+              radius: 12,
+            ),
+            SizedBox(
+              width: w(28),
+            ),
+            AdminSkeletonBox(
+              width: w(92),
+              height: 28,
+              radius: 8,
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
-class _FoodPaginationSkeleton extends StatelessWidget {
+class _FoodPaginationSkeleton
+    extends StatelessWidget {
   const _FoodPaginationSkeleton();
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 44,
-      child: Row(
-        children: const [
-          AdminSkeletonBox(
-            width: 135,
-            height: 11,
-            radius: 6,
-          ),
-          Spacer(),
-          AdminSkeletonBox(
-            width: 78,
-            height: 11,
-            radius: 6,
-          ),
-          SizedBox(width: 16),
-          AdminSkeletonBox(
-            width: 32,
-            height: 32,
-            radius: 8,
-          ),
-          SizedBox(width: 8),
-          AdminSkeletonBox(
-            width: 70,
-            height: 11,
-            radius: 6,
-          ),
-          SizedBox(width: 8),
-          AdminSkeletonBox(
-            width: 32,
-            height: 32,
-            radius: 8,
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const baseWidth = 379.0;
+
+          final widthScale =
+              (constraints.maxWidth / baseWidth)
+                  .clamp(0.0, 1.0);
+
+          double w(double value) =>
+              value * widthScale;
+
+          return Row(
+            children: [
+              AdminSkeletonBox(
+                width: w(135),
+                height: 11,
+                radius: 6,
+              ),
+              const Spacer(),
+              AdminSkeletonBox(
+                width: w(78),
+                height: 11,
+                radius: 6,
+              ),
+              SizedBox(
+                width: w(16),
+              ),
+              AdminSkeletonBox(
+                width: w(32),
+                height: 32,
+                radius: 8,
+              ),
+              SizedBox(
+                width: w(8),
+              ),
+              AdminSkeletonBox(
+                width: w(70),
+                height: 11,
+                radius: 6,
+              ),
+              SizedBox(
+                width: w(8),
+              ),
+              AdminSkeletonBox(
+                width: w(32),
+                height: 32,
+                radius: 8,
+              ),
+            ],
+          );
+        },
       ),
     );
   }

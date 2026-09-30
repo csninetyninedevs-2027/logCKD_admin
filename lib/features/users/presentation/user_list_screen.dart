@@ -94,9 +94,21 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                   onRetry: () => ref.invalidate(userListProvider),
                 ),
                 data: (page) {
-                  final active = page.users.where((user) => user.isActive).length;
-                  final ckd = page.users.where((user) => (user.ckdStage ?? '').trim().isNotEmpty).length;
-                  final regions = page.users.map((user) => user.region.trim()).where((e) => e.isNotEmpty).toSet().length;
+                  final active =
+                      page.users.where((user) => user.isActive).length;
+
+                  final awarenessOnly =
+                      page.users.where((user) => user.isAwarenessOnly).length;
+
+                  final ckd = page.users
+                      .where((user) => (user.ckdStage ?? '').trim().isNotEmpty)
+                      .length;
+
+                  final regions = page.users
+                      .map((user) => user.region.trim())
+                      .where((value) => value.isNotEmpty)
+                      .toSet()
+                      .length;
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,6 +119,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                           total: page.total,
                           visible: page.users.length,
                           active: active,
+                          awarenessOnly: awarenessOnly,
                           ckd: ckd,
                           regions: regions,
                         ),
@@ -136,9 +149,9 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                                 scrollDirection: Axis.horizontal,
                                                 child: ConstrainedBox(
                                                 constraints: BoxConstraints(
-                                                  minWidth: constraints.maxWidth > 1020
+                                                  minWidth: constraints.maxWidth > 1160
                                                       ? constraints.maxWidth
-                                                      : 1020,
+                                                      : 1160,
                                                 ),
                                                 child: DataTable(
                                                 showCheckboxColumn: false,
@@ -152,7 +165,8 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                                   DataColumn(label: Text('REGION')),
                                                   DataColumn(label: Text('HEALTH STATUS')),
                                                   DataColumn(label: Text('CKD STAGE')),
-                                                  DataColumn(label: Text('ACCESS')),
+                                                  DataColumn(label: Text('ACCESS MODE')),
+                                                  DataColumn(label: Text('STATUS')),
                                                   DataColumn(label: Text('LAST LOGIN')),
                                                 ],
                                                 rows: [
@@ -189,7 +203,16 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                                                         ),
                                                         DataCell(_MutedText(user.region)),
                                                         DataCell(_HealthPill(user.healthStatus)),
-                                                        DataCell(Text(user.ckdStage ?? '—')),
+                                                        DataCell(
+                                                          Text(
+                                                            _displayValue(user.ckdStage),
+                                                          ),
+                                                        ),
+                                                        DataCell(
+                                                          _AccessModePill(
+                                                            accessMode: user.accessMode,
+                                                          ),
+                                                        ),
                                                         DataCell(
                                                           user.isActive
                                                               ? AdminStatusBadge.active()
@@ -235,6 +258,7 @@ class _UserMetricStrip extends StatelessWidget {
     required this.total,
     required this.visible,
     required this.active,
+    required this.awarenessOnly,
     required this.ckd,
     required this.regions,
   });
@@ -242,6 +266,7 @@ class _UserMetricStrip extends StatelessWidget {
   final int total;
   final int visible;
   final int active;
+  final int awarenessOnly;
   final int ckd;
   final int regions;
 
@@ -258,6 +283,7 @@ class _UserMetricStrip extends StatelessWidget {
               _Metric(label: 'TOTAL ACCOUNTS', value: '$total', accent: AppColors.primaryBright),
               _Metric(label: 'VISIBLE PAGE', value: '$visible', accent: AppColors.softBlue),
               _Metric(label: 'ACTIVE ON PAGE', value: '$active', accent: AppColors.success),
+              _Metric(label: 'AWARENESS ONLY', value: '$awarenessOnly', accent: AppColors.warning),
               _Metric(label: 'CKD STAGE RECORDED', value: '$ckd', accent: AppColors.warning),
               _Metric(label: 'REGIONS ON PAGE', value: '$regions', accent: AppColors.coral),
             ],
@@ -397,8 +423,20 @@ class _HealthPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalized = value.toLowerCase();
-    final color = normalized.contains('ckd') ? AppColors.warning : AppColors.primaryBright;
+    final trimmed = value.trim();
+    final missing = trimmed.isEmpty;
+    final normalized = trimmed.toLowerCase();
+
+    final color = missing
+        ? AppColors.textMuted
+        : normalized.contains('ckd')
+            ? AppColors.warning
+            : AppColors.primaryBright;
+
+    final label = missing
+        ? 'Not provided'
+        : _titleCase(trimmed);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
@@ -406,7 +444,58 @@ class _HealthPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color.withValues(alpha: .18)),
       ),
-      child: Text(value, style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w600)),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _AccessModePill extends StatelessWidget {
+  const _AccessModePill({
+    required this.accessMode,
+  });
+
+  final String accessMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final awarenessOnly =
+        accessMode == 'awareness_only';
+
+    final color = awarenessOnly
+        ? AppColors.warning
+        : AppColors.primaryBright;
+
+    final label = awarenessOnly
+        ? 'Awareness only'
+        : 'Full access';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 9,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withValues(alpha: .18),
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
@@ -417,7 +506,13 @@ class _MutedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(value, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5));
+    return Text(
+      _displayValue(value),
+      style: const TextStyle(
+        color: AppColors.textSecondary,
+        fontSize: 11.5,
+      ),
+    );
   }
 }
 
@@ -472,6 +567,31 @@ class _UsersError extends StatelessWidget {
       ),
     );
   }
+}
+
+String _displayValue(
+  String? value,
+) {
+  final trimmed =
+      value?.trim() ?? '';
+
+  return trimmed.isEmpty
+      ? '—'
+      : trimmed;
+}
+
+String _titleCase(
+  String value,
+) {
+  return value
+      .replaceAll('_', ' ')
+      .split(RegExp(r'\s+'))
+      .where((part) => part.isNotEmpty)
+      .map(
+        (part) =>
+            '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}',
+      )
+      .join(' ');
 }
 
 String _shortDate(DateTime date) {

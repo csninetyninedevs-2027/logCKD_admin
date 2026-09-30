@@ -7,6 +7,7 @@ import '../../features/auth/state/auth_provider.dart';
 import '../../features/content/presentation/facility_list_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/foods/presentation/food_list_screen.dart';
+import '../../features/research_guidelines/presentation/research_guidelines_screen.dart';
 import '../../features/system_status/presentation/system_status_screen.dart';
 import '../../features/user_map/presentation/user_concentration_screen.dart';
 import '../../features/users/presentation/user_detail_screen.dart';
@@ -94,6 +95,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: SystemStatusScreen(),
             ),
           ),
+          GoRoute(
+            path: '/research-guidelines',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ResearchGuidelinesScreen(),
+            ),
+          ),
         ],
       ),
     ],
@@ -106,6 +113,8 @@ int _selectedIndexForLocation(String path) {
   if (path.startsWith('/foods')) return 3;
   if (path.startsWith('/user-concentration')) return 4;
   if (path.startsWith('/system-status')) return 5;
+  if (path.startsWith('/research-guidelines')) return 6;
+
   return 0;
 }
 

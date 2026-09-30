@@ -10,6 +10,9 @@ class AdminUserSummary {
     required this.cityMunicipality,
     required this.healthStatus,
     required this.ckdStage,
+    required this.accessMode,
+    required this.agreementAccepted,
+    required this.profileSetupComplete,
     required this.isActive,
     required this.createdAt,
     required this.lastLoginAt,
@@ -19,35 +22,105 @@ class AdminUserSummary {
   final String firstName;
   final String lastName;
   final String email;
+
+  /// Profile fields are intentionally stored as empty strings in the
+  /// admin model when the backend returns null.
+  ///
+  /// Awareness-only accounts are valid accounts even when they never
+  /// completed profile setup.
   final String sex;
   final String region;
   final String province;
   final String cityMunicipality;
   final String healthStatus;
   final String? ckdStage;
+
+  /// full
+  /// awareness_only
+  final String accessMode;
+
+  final bool agreementAccepted;
+  final bool profileSetupComplete;
   final bool isActive;
   final DateTime createdAt;
   final DateTime? lastLoginAt;
 
-  String get fullName => '$firstName $lastName';
+  String get fullName {
+    final name = '$firstName $lastName'.trim();
 
-  factory AdminUserSummary.fromJson(Map<String, dynamic> json) {
+    if (name.isNotEmpty) {
+      return name;
+    }
+
+    if (email.isNotEmpty) {
+      return email;
+    }
+
+    return 'Unnamed user';
+  }
+
+  bool get isAwarenessOnly =>
+      accessMode == 'awareness_only';
+
+  bool get hasFullAccess =>
+      accessMode == 'full';
+
+  factory AdminUserSummary.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return AdminUserSummary(
-      id: json['_id'] as String,
-      firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
-      email: json['email'] as String,
-      sex: json['sex'] as String,
-      region: json['region'] as String,
-      province: json['province'] as String,
-      cityMunicipality: json['cityMunicipality'] as String,
-      healthStatus: json['healthStatus'] as String,
-      ckdStage: json['ckdStage'] as String?,
-      isActive: json['isActive'] as bool? ?? true,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      lastLoginAt: json['lastLoginAt'] != null
-          ? DateTime.parse(json['lastLoginAt'] as String)
-          : null,
+      id: _stringValue(
+        json['_id'] ?? json['id'],
+      ),
+      firstName:
+          _stringValue(json['firstName']),
+      lastName:
+          _stringValue(json['lastName']),
+      email:
+          _stringValue(json['email']),
+      sex:
+          _stringValue(json['sex']),
+      region:
+          _stringValue(json['region']),
+      province:
+          _stringValue(json['province']),
+      cityMunicipality:
+          _stringValue(
+        json['cityMunicipality'],
+      ),
+      healthStatus:
+          _stringValue(
+        json['healthStatus'],
+      ),
+      ckdStage:
+          _nullableStringValue(
+        json['ckdStage'],
+      ),
+      accessMode:
+          _normalizeAccessMode(
+        json['accessMode'],
+      ),
+      agreementAccepted:
+          json['agreementAccepted']
+                  as bool? ??
+              false,
+      profileSetupComplete:
+          json['profileSetupComplete']
+                  as bool? ??
+              false,
+      isActive:
+          json['isActive']
+                  as bool? ??
+              true,
+      createdAt:
+          _requiredDateTime(
+        json['createdAt'],
+        fieldName: 'createdAt',
+      ),
+      lastLoginAt:
+          _nullableDateTime(
+        json['lastLoginAt'],
+      ),
     );
   }
 }
@@ -65,14 +138,39 @@ class UserListPage {
   final int limit;
   final List<AdminUserSummary> users;
 
-  factory UserListPage.fromJson(Map<String, dynamic> json) {
+  factory UserListPage.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawUsers =
+        json['data'];
+
     return UserListPage(
-      total: json['total'] as int,
-      page: json['page'] as int,
-      limit: json['limit'] as int,
-      users: (json['data'] as List)
-          .map((e) => AdminUserSummary.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      total:
+          _intValue(json['total']),
+      page:
+          _intValue(
+        json['page'],
+        fallback: 1,
+      ),
+      limit:
+          _intValue(
+        json['limit'],
+        fallback: 25,
+      ),
+      users: rawUsers is List
+          ? rawUsers
+              .whereType<Map>()
+              .map(
+                (entry) =>
+                    AdminUserSummary
+                        .fromJson(
+                  Map<String, dynamic>.from(
+                    entry,
+                  ),
+                ),
+              )
+              .toList()
+          : const [],
     );
   }
 }
@@ -88,11 +186,22 @@ class ActivitySummary {
   final int waterLogCount;
   final int activityCount;
 
-  factory ActivitySummary.fromJson(Map<String, dynamic> json) {
+  factory ActivitySummary.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return ActivitySummary(
-      foodLogCount: json['foodLogCount'] as int? ?? 0,
-      waterLogCount: json['waterLogCount'] as int? ?? 0,
-      activityCount: json['activityCount'] as int? ?? 0,
+      foodLogCount:
+          _intValue(
+        json['foodLogCount'],
+      ),
+      waterLogCount:
+          _intValue(
+        json['waterLogCount'],
+      ),
+      activityCount:
+          _intValue(
+        json['activityCount'],
+      ),
     );
   }
 }
@@ -113,23 +222,169 @@ class AdminUserDetail {
   /// family history) without adding a new class for every field.
   final Map<String, dynamic> rawUserJson;
 
-  final Map<String, dynamic>? latestRiskAssessment;
-  final Map<String, dynamic>? latestCheckup;
+  final Map<String, dynamic>?
+      latestRiskAssessment;
+
+  final Map<String, dynamic>?
+      latestCheckup;
+
   final ActivitySummary activitySummary;
 
-  factory AdminUserDetail.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>;
-    final userJson = data['user'] as Map<String, dynamic>;
+  factory AdminUserDetail.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawData =
+        json['data'];
+
+    if (rawData is! Map) {
+      throw const FormatException(
+        'User detail response did not contain data.',
+      );
+    }
+
+    final data =
+        Map<String, dynamic>.from(
+      rawData,
+    );
+
+    final rawUser =
+        data['user'];
+
+    if (rawUser is! Map) {
+      throw const FormatException(
+        'User detail response did not contain a user.',
+      );
+    }
+
+    final userJson =
+        Map<String, dynamic>.from(
+      rawUser,
+    );
 
     return AdminUserDetail(
-      user: AdminUserSummary.fromJson(userJson),
-      rawUserJson: userJson,
+      user:
+          AdminUserSummary.fromJson(
+        userJson,
+      ),
+      rawUserJson:
+          userJson,
       latestRiskAssessment:
-          data['latestRiskAssessment'] as Map<String, dynamic>?,
-      latestCheckup: data['latestCheckup'] as Map<String, dynamic>?,
-      activitySummary: ActivitySummary.fromJson(
-        data['activitySummary'] as Map<String, dynamic>? ?? {},
+          _nullableMap(
+        data['latestRiskAssessment'],
+      ),
+      latestCheckup:
+          _nullableMap(
+        data['latestCheckup'],
+      ),
+      activitySummary:
+          ActivitySummary.fromJson(
+        _nullableMap(
+              data['activitySummary'],
+            ) ??
+            const {},
       ),
     );
   }
+}
+
+String _stringValue(
+  dynamic value,
+) {
+  return value
+          ?.toString()
+          .trim() ??
+      '';
+}
+
+String? _nullableStringValue(
+  dynamic value,
+) {
+  final text =
+      _stringValue(value);
+
+  return text.isEmpty
+      ? null
+      : text;
+}
+
+String _normalizeAccessMode(
+  dynamic value,
+) {
+  final mode =
+      _stringValue(value)
+          .toLowerCase();
+
+  if (mode ==
+      'awareness_only') {
+    return 'awareness_only';
+  }
+
+  // Existing accounts created before accessMode was introduced
+  // should continue to behave as full-access admin records.
+  return 'full';
+}
+
+int _intValue(
+  dynamic value, {
+  int fallback = 0,
+}) {
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  return int.tryParse(
+        value?.toString() ?? '',
+      ) ??
+      fallback;
+}
+
+DateTime _requiredDateTime(
+  dynamic value, {
+  required String fieldName,
+}) {
+  final parsed =
+      DateTime.tryParse(
+    value?.toString() ?? '',
+  );
+
+  if (parsed == null) {
+    throw FormatException(
+      'User response contained an invalid $fieldName.',
+    );
+  }
+
+  return parsed;
+}
+
+DateTime? _nullableDateTime(
+  dynamic value,
+) {
+  if (value == null) {
+    return null;
+  }
+
+  final text =
+      value.toString().trim();
+
+  if (text.isEmpty) {
+    return null;
+  }
+
+  return DateTime.tryParse(text);
+}
+
+Map<String, dynamic>? _nullableMap(
+  dynamic value,
+) {
+  if (value is! Map) {
+    return null;
+  }
+
+  return Map<String, dynamic>.from(
+    value,
+  );
 }

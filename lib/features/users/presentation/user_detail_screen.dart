@@ -125,11 +125,20 @@ class UserDetailScreen extends ConsumerWidget {
                             name: user.fullName,
                             email: user.email,
                             isActive: user.isActive,
-                            sex: user.sex,
-                            region: user.region,
-                            location: '${user.cityMunicipality}, ${user.province}',
-                            healthStatus: user.healthStatus,
-                            ckdStage: user.ckdStage ?? 'N/A',
+                            accessMode: user.accessMode,
+                            sex: _displayValue(user.sex),
+                            region: _displayValue(user.region),
+                            location: _locationLabel(
+                              user.cityMunicipality,
+                              user.province,
+                            ),
+                            healthStatus: user.healthStatus.trim().isEmpty
+                                ? 'Not provided'
+                                : _titleCase(user.healthStatus),
+                            ckdStage: user.ckdStage == null ||
+                                    user.ckdStage!.trim().isEmpty
+                                ? 'Not provided'
+                                : _titleCase(user.ckdStage!),
                             joined: _date(user.createdAt),
                             lastLogin: user.lastLoginAt == null ? 'Never' : _date(user.lastLoginAt!),
                             onToggleStatus: () => _confirmToggleActive(context, ref, user.isActive),
@@ -223,6 +232,7 @@ class _IdentityPanel extends StatelessWidget {
     required this.name,
     required this.email,
     required this.isActive,
+    required this.accessMode,
     required this.sex,
     required this.region,
     required this.location,
@@ -236,6 +246,7 @@ class _IdentityPanel extends StatelessWidget {
   final String name;
   final String email;
   final bool isActive;
+  final String accessMode;
   final String sex;
   final String region;
   final String location;
@@ -273,15 +284,49 @@ class _IdentityPanel extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         isActive ? AdminStatusBadge.active() : AdminStatusBadge.inactive(),
+                        const SizedBox(width: 8),
+                        _AccessModeBadge(
+                          accessMode: accessMode,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(email, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                    if (accessMode == 'awareness_only') ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: .07),
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(
+                            color: AppColors.warning.withValues(alpha: .18),
+                          ),
+                        ),
+                        child: const Text(
+                          'Awareness-only account. This user may legitimately have no completed profile or personalized health data.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 10.5,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 18),
                     Wrap(
                       spacing: 28,
                       runSpacing: 16,
                       children: [
+                        _Info(
+                          label: 'ACCESS MODE',
+                          value: accessMode == 'awareness_only'
+                              ? 'Awareness only'
+                              : 'Full access',
+                        ),
                         _Info(label: 'SEX', value: sex),
                         _Info(label: 'REGION', value: region),
                         _Info(label: 'LOCATION', value: location),
@@ -319,6 +364,49 @@ class _IdentityPanel extends StatelessWidget {
             children: [Expanded(child: profile), const SizedBox(width: 24), action],
           );
         },
+      ),
+    );
+  }
+}
+
+class _AccessModeBadge extends StatelessWidget {
+  const _AccessModeBadge({
+    required this.accessMode,
+  });
+
+  final String accessMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final awarenessOnly =
+        accessMode == 'awareness_only';
+
+    final color = awarenessOnly
+        ? AppColors.warning
+        : AppColors.primaryBright;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 9,
+        vertical: 5,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .08),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(
+          color: color.withValues(alpha: .18),
+        ),
+      ),
+      child: Text(
+        awarenessOnly
+            ? 'AWARENESS ONLY'
+            : 'FULL ACCESS',
+        style: TextStyle(
+          color: color,
+          fontSize: 8,
+          fontWeight: FontWeight.w800,
+          letterSpacing: .55,
+        ),
       ),
     );
   }
@@ -546,6 +634,33 @@ class _RawHealthPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+String _displayValue(
+  String? value,
+) {
+  final trimmed =
+      value?.trim() ?? '';
+
+  return trimmed.isEmpty
+      ? 'Not provided'
+      : trimmed;
+}
+
+String _locationLabel(
+  String cityMunicipality,
+  String province,
+) {
+  final parts = [
+    cityMunicipality.trim(),
+    province.trim(),
+  ].where((part) => part.isNotEmpty).toList();
+
+  if (parts.isEmpty) {
+    return 'Not provided';
+  }
+
+  return parts.join(', ');
 }
 
 String _date(DateTime value) {

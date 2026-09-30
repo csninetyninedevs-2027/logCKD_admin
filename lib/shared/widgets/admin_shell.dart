@@ -8,7 +8,8 @@ import '../../core/theme/app_theme.dart';
 import '../../features/auth/state/auth_provider.dart';
 import 'admin_responsive.dart';
 
-final adminSidebarCollapsedProvider = StateProvider<bool>((ref) => false);
+final adminSidebarCollapsedProvider =
+    StateProvider<bool>((ref) => false);
 
 class AdminShell extends ConsumerWidget {
   const AdminShell({
@@ -21,8 +22,16 @@ class AdminShell extends ConsumerWidget {
   final Widget child;
 
   static const _destinations = [
-    (icon: Icons.grid_view_rounded, label: 'Dashboard', path: '/dashboard'),
-    (icon: Icons.people_alt_outlined, label: 'Users', path: '/users'),
+    (
+      icon: Icons.grid_view_rounded,
+      label: 'Dashboard',
+      path: '/dashboard',
+    ),
+    (
+      icon: Icons.people_alt_outlined,
+      label: 'Users',
+      path: '/users',
+    ),
     (
       icon: Icons.local_hospital_outlined,
       label: 'Facilities',
@@ -43,16 +52,25 @@ class AdminShell extends ConsumerWidget {
       label: 'System',
       path: '/system-status',
     ),
+    (
+      icon: Icons.science_outlined,
+      label: 'Research & Guidelines',
+      path: '/research-guidelines',
+    ),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final admin = ref.watch(authStateProvider).admin;
-    final requestedCollapsed = ref.watch(adminSidebarCollapsedProvider);
+    final requestedCollapsed =
+        ref.watch(adminSidebarCollapsedProvider);
+
     final width = MediaQuery.sizeOf(context).width;
     final compact = width < AdminBreakpoints.compact;
-    final forcedCollapsed = width < AdminBreakpoints.navigation;
-    final collapsed = forcedCollapsed || requestedCollapsed;
+    final forcedCollapsed =
+        width < AdminBreakpoints.navigation;
+    final collapsed =
+        forcedCollapsed || requestedCollapsed;
 
     void navigate(int index) {
       context.go(_destinations[index].path);
@@ -69,17 +87,28 @@ class AdminShell extends ConsumerWidget {
       onToggleCollapsed: forcedCollapsed
           ? null
           : () {
-              ref.read(adminSidebarCollapsedProvider.notifier).state =
+              ref
+                      .read(
+                        adminSidebarCollapsedProvider.notifier,
+                      )
+                      .state =
                   !requestedCollapsed;
             },
-      onLogout: () => ref.read(authStateProvider.notifier).logout(),
+      onLogout: () =>
+          ref.read(authStateProvider.notifier).logout(),
     );
 
     final content = Stack(
       children: [
-        const Positioned.fill(child: _AdminBackdrop()),
+        const Positioned.fill(
+          child: _AdminBackdrop(),
+        ),
         Positioned.fill(
-          child: SafeArea(left: false, top: !compact, child: child),
+          child: SafeArea(
+            left: false,
+            top: !compact,
+            child: child,
+          ),
         ),
       ],
     );
@@ -127,7 +156,8 @@ class AdminShell extends ConsumerWidget {
               child: _AdminSidebar(
                 collapsed: false,
                 selectedIndex: selectedIndex,
-                adminName: admin?.name ?? 'Administrator',
+                adminName:
+                    admin?.name ?? 'Administrator',
                 adminEmail: admin?.email ?? '',
                 adminRole: admin?.role ?? 'admin',
                 destinations: _destinations,
@@ -136,7 +166,9 @@ class AdminShell extends ConsumerWidget {
                   navigate(index);
                 },
                 onToggleCollapsed: null,
-                onLogout: () => ref.read(authStateProvider.notifier).logout(),
+                onLogout: () => ref
+                    .read(authStateProvider.notifier)
+                    .logout(),
               ),
             ),
           ),
@@ -175,7 +207,14 @@ class _AdminSidebar extends StatelessWidget {
   final String adminName;
   final String adminEmail;
   final String adminRole;
-  final List<({IconData icon, String label, String path})> destinations;
+
+  final List<
+      ({
+        IconData icon,
+        String label,
+        String path,
+      })> destinations;
+
   final ValueChanged<int> onDestinationSelected;
   final VoidCallback? onToggleCollapsed;
   final VoidCallback onLogout;
@@ -189,35 +228,55 @@ class _AdminSidebar extends StatelessWidget {
       width: collapsed ? 76 : 244,
       decoration: const BoxDecoration(
         color: AppColors.sidebar,
-        border: Border(right: BorderSide(color: AppColors.border)),
+        border: Border(
+          right: BorderSide(
+            color: AppColors.border,
+          ),
+        ),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final contentCollapsed = constraints.maxWidth < 220;
+          final contentCollapsed =
+              constraints.maxWidth < 220;
 
           return SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: contentCollapsed ? 8 : 14,
+                horizontal:
+                    contentCollapsed ? 8 : 14,
                 vertical: 14,
               ),
               child: Column(
                 children: [
-                  _Brand(collapsed: contentCollapsed),
+                  _Brand(
+                    collapsed: contentCollapsed,
+                  ),
                   const SizedBox(height: 26),
                   Expanded(
                     child: ListView.separated(
                       padding: EdgeInsets.zero,
                       itemCount: destinations.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 5),
-                      itemBuilder: (context, index) {
-                        final destination = destinations[index];
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: 5),
+                      itemBuilder:
+                          (context, index) {
+                        final destination =
+                            destinations[index];
+
                         return _SidebarDestination(
-                          collapsed: contentCollapsed,
-                          selected: selectedIndex == index,
-                          icon: destination.icon,
-                          label: destination.label,
-                          onTap: () => onDestinationSelected(index),
+                          collapsed:
+                              contentCollapsed,
+                          selected:
+                              selectedIndex ==
+                                  index,
+                          icon:
+                              destination.icon,
+                          label:
+                              destination.label,
+                          onTap: () =>
+                              onDestinationSelected(
+                                index,
+                              ),
                         );
                       },
                     ),
@@ -232,25 +291,35 @@ class _AdminSidebar extends StatelessWidget {
                   if (contentCollapsed)
                     _CollapsedBottomActions(
                       onLogout: onLogout,
-                      onToggleCollapsed: onToggleCollapsed,
+                      onToggleCollapsed:
+                          onToggleCollapsed,
                     )
                   else
                     Row(
                       children: [
                         Expanded(
-                          child: _SidebarSmallButton(
-                            icon: Icons.logout_rounded,
+                          child:
+                              _SidebarSmallButton(
+                            icon:
+                                Icons.logout_rounded,
                             label: 'Sign out',
                             onTap: onLogout,
                           ),
                         ),
-                        if (onToggleCollapsed != null) ...[
-                          const SizedBox(width: 6),
+                        if (onToggleCollapsed !=
+                            null) ...[
+                          const SizedBox(
+                            width: 6,
+                          ),
                           Tooltip(
-                            message: 'Collapse navigation',
-                            child: _CompactIconButton(
-                              onPressed: onToggleCollapsed!,
-                              icon: Icons.keyboard_double_arrow_left_rounded,
+                            message:
+                                'Collapse navigation',
+                            child:
+                                _CompactIconButton(
+                              onPressed:
+                                  onToggleCollapsed!,
+                              icon: Icons
+                                  .keyboard_double_arrow_left_rounded,
                             ),
                           ),
                         ],
@@ -266,7 +335,8 @@ class _AdminSidebar extends StatelessWidget {
   }
 }
 
-class _CollapsedBottomActions extends StatelessWidget {
+class _CollapsedBottomActions
+    extends StatelessWidget {
   const _CollapsedBottomActions({
     required this.onLogout,
     required this.onToggleCollapsed,
@@ -293,7 +363,8 @@ class _CollapsedBottomActions extends StatelessWidget {
             message: 'Expand navigation',
             child: _CompactIconButton(
               onPressed: onToggleCollapsed!,
-              icon: Icons.keyboard_double_arrow_right_rounded,
+              icon: Icons
+                  .keyboard_double_arrow_right_rounded,
               highlighted: true,
             ),
           ),
@@ -303,7 +374,8 @@ class _CollapsedBottomActions extends StatelessWidget {
   }
 }
 
-class _CompactIconButton extends StatelessWidget {
+class _CompactIconButton
+    extends StatelessWidget {
   const _CompactIconButton({
     required this.onPressed,
     required this.icon,
@@ -322,11 +394,14 @@ class _CompactIconButton extends StatelessWidget {
       child: Material(
         color: highlighted
             ? AppColors.sidebarActive
-            : AppColors.surface.withValues(alpha: .52),
+            : AppColors.surface.withValues(
+                alpha: .52,
+              ),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius:
+              BorderRadius.circular(12),
           child: Icon(
             icon,
             size: 18,
@@ -341,7 +416,9 @@ class _CompactIconButton extends StatelessWidget {
 }
 
 class _Brand extends StatelessWidget {
-  const _Brand({required this.collapsed});
+  const _Brand({
+    required this.collapsed,
+  });
 
   final bool collapsed;
 
@@ -359,14 +436,18 @@ class _Brand extends StatelessWidget {
             height: 38,
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(11),
-              color: AppColors.primary.withValues(alpha: .07),
+              borderRadius:
+                  BorderRadius.circular(11),
+              color: AppColors.primary
+                  .withValues(alpha: .07),
               border: Border.all(
-                color: AppColors.primaryBright.withValues(alpha: .16),
+                color: AppColors.primaryBright
+                    .withValues(alpha: .16),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: .12),
+                  color: AppColors.primary
+                      .withValues(alpha: .12),
                   blurRadius: 16,
                 ),
               ],
@@ -380,27 +461,35 @@ class _Brand extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment:
+                    MainAxisAlignment.center,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
                           text: 'log.',
-                          style: GoogleFonts.simonetta(
-                            color: AppColors.textPrimary,
+                          style:
+                              GoogleFonts.simonetta(
+                            color: AppColors
+                                .textPrimary,
                             fontSize: 21,
-                            fontWeight: FontWeight.w500,
+                            fontWeight:
+                                FontWeight.w500,
                             letterSpacing: -.7,
                           ),
                         ),
                         TextSpan(
                           text: 'CKD',
-                          style: GoogleFonts.montserrat(
-                            color: AppColors.primaryBright,
+                          style:
+                              GoogleFonts.montserrat(
+                            color: AppColors
+                                .primaryBright,
                             fontSize: 21,
-                            fontWeight: FontWeight.w500,
+                            fontWeight:
+                                FontWeight.w500,
                             letterSpacing: -.7,
                           ),
                         ),
@@ -410,9 +499,11 @@ class _Brand extends StatelessWidget {
                   const Text(
                     'ADMIN CONSOLE',
                     style: TextStyle(
-                      color: AppColors.primaryBright,
+                      color:
+                          AppColors.primaryBright,
                       fontSize: 8,
-                      fontWeight: FontWeight.w800,
+                      fontWeight:
+                          FontWeight.w800,
                       letterSpacing: 1.35,
                     ),
                   ),
@@ -426,7 +517,8 @@ class _Brand extends StatelessWidget {
   }
 }
 
-class _SidebarDestination extends StatefulWidget {
+class _SidebarDestination
+    extends StatefulWidget {
   const _SidebarDestination({
     required this.collapsed,
     required this.selected,
@@ -442,20 +534,28 @@ class _SidebarDestination extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_SidebarDestination> createState() => _SidebarDestinationState();
+  State<_SidebarDestination>
+      createState() =>
+          _SidebarDestinationState();
 }
 
-class _SidebarDestinationState extends State<_SidebarDestination> {
+class _SidebarDestinationState
+    extends State<_SidebarDestination> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
     final active = widget.selected;
-    final color = active ? AppColors.textPrimary : AppColors.textSecondary;
+
+    final color = active
+        ? AppColors.textPrimary
+        : AppColors.textSecondary;
 
     final item = MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (_) =>
+          setState(() => _hovered = true),
+      onExit: (_) =>
+          setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
       child: AnimatedContainer(
         duration: AdminMotion.fast,
@@ -465,48 +565,68 @@ class _SidebarDestinationState extends State<_SidebarDestination> {
           color: active
               ? AppColors.sidebarActive
               : _hovered
-              ? AppColors.surface.withValues(alpha: 0.7)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+                  ? AppColors.surface
+                      .withValues(alpha: .7)
+                  : Colors.transparent,
+          borderRadius:
+              BorderRadius.circular(12),
           border: Border.all(
             color: active
-                ? AppColors.primary.withValues(alpha: 0.28)
+                ? AppColors.primary
+                    .withValues(alpha: .28)
                 : Colors.transparent,
           ),
         ),
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius:
+              BorderRadius.circular(12),
           child: Row(
-            mainAxisAlignment: widget.collapsed
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.start,
+            mainAxisAlignment:
+                widget.collapsed
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
             children: [
               if (!widget.collapsed)
                 AnimatedContainer(
                   duration: AdminMotion.fast,
                   width: 3,
                   height: active ? 21 : 0,
-                  margin: const EdgeInsets.only(left: 5, right: 10),
+                  margin:
+                      const EdgeInsets.only(
+                    left: 5,
+                    right: 10,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBright,
-                    borderRadius: BorderRadius.circular(99),
+                    color:
+                        AppColors.primaryBright,
+                    borderRadius:
+                        BorderRadius.circular(
+                      99,
+                    ),
                   ),
                 ),
               Icon(
                 widget.icon,
                 size: 19,
-                color: active ? AppColors.primaryBright : color,
+                color: active
+                    ? AppColors.primaryBright
+                    : color,
               ),
               if (!widget.collapsed) ...[
                 const SizedBox(width: 11),
                 Expanded(
                   child: Text(
                     widget.label,
+                    overflow:
+                        TextOverflow.ellipsis,
+                    maxLines: 1,
                     style: TextStyle(
                       color: color,
                       fontSize: 12.5,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: active
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
@@ -518,8 +638,12 @@ class _SidebarDestinationState extends State<_SidebarDestination> {
     );
 
     if (widget.collapsed) {
-      return Tooltip(message: widget.label, child: item);
+      return Tooltip(
+        message: widget.label,
+        child: item,
+      );
     }
+
     return item;
   }
 }
@@ -539,15 +663,21 @@ class _AdminIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial = name.trim().isEmpty ? 'A' : name.trim()[0].toUpperCase();
+    final initial = name.trim().isEmpty
+        ? 'A'
+        : name.trim()[0].toUpperCase();
 
     final avatar = Container(
       width: 38,
       height: 38,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primary.withValues(alpha: 0.13),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.36)),
+        color: AppColors.primary
+            .withValues(alpha: .13),
+        border: Border.all(
+          color: AppColors.primary
+              .withValues(alpha: .36),
+        ),
       ),
       child: Center(
         child: Text(
@@ -572,9 +702,12 @@ class _AdminIdentity extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.74),
+        color: AppColors.surface
+            .withValues(alpha: .74),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: AppColors.border,
+        ),
       ),
       child: Row(
         children: [
@@ -582,22 +715,28 @@ class _AdminIdentity extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
+                    fontWeight:
+                        FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 1),
                 Text(
-                  email.isNotEmpty ? email : role.toUpperCase(),
+                  email.isNotEmpty
+                      ? email
+                      : role.toUpperCase(),
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppColors.textMuted,
                     fontSize: 9.5,
@@ -612,7 +751,8 @@ class _AdminIdentity extends StatelessWidget {
   }
 }
 
-class _SidebarSmallButton extends StatelessWidget {
+class _SidebarSmallButton
+    extends StatelessWidget {
   const _SidebarSmallButton({
     required this.icon,
     required this.label,
@@ -627,8 +767,16 @@ class _SidebarSmallButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton.icon(
       onPressed: onTap,
-      icon: Icon(icon, size: 17),
-      label: Text(label, style: const TextStyle(fontSize: 11)),
+      icon: Icon(
+        icon,
+        size: 17,
+      ),
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+        ),
+      ),
     );
   }
 }
@@ -647,60 +795,99 @@ class _AdminBackdrop extends StatelessWidget {
   }
 }
 
-class _AdminBackdropPainter extends CustomPainter {
+class _AdminBackdropPainter
+    extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final gridPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.018)
-      ..strokeWidth = 0.7;
+      ..color =
+          Colors.white.withValues(alpha: .018)
+      ..strokeWidth = .7;
 
     const step = 34.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
+
+    for (
+      double x = 0;
+      x < size.width;
+      x += step
+    ) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        gridPaint,
+      );
     }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+
+    for (
+      double y = 0;
+      y < size.height;
+      y += step
+    ) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        gridPaint,
+      );
     }
 
     final tealGlow = Paint()
-      ..shader =
-          RadialGradient(
-            colors: [
-              AppColors.primary.withValues(alpha: 0.11),
-              AppColors.primary.withValues(alpha: 0),
-            ],
-          ).createShader(
-            Rect.fromCircle(
-              center: Offset(size.width * 0.88, size.height * 0.08),
-              radius: 330,
-            ),
-          );
+      ..shader = RadialGradient(
+        colors: [
+          AppColors.primary
+              .withValues(alpha: .11),
+          AppColors.primary
+              .withValues(alpha: 0),
+        ],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(
+            size.width * .88,
+            size.height * .08,
+          ),
+          radius: 330,
+        ),
+      );
+
     canvas.drawCircle(
-      Offset(size.width * 0.88, size.height * 0.08),
+      Offset(
+        size.width * .88,
+        size.height * .08,
+      ),
       330,
       tealGlow,
     );
 
     final coralGlow = Paint()
-      ..shader =
-          RadialGradient(
-            colors: [
-              AppColors.coral.withValues(alpha: 0.045),
-              AppColors.coral.withValues(alpha: 0),
-            ],
-          ).createShader(
-            Rect.fromCircle(
-              center: Offset(size.width * 0.18, size.height * 0.96),
-              radius: 280,
-            ),
-          );
+      ..shader = RadialGradient(
+        colors: [
+          AppColors.coral
+              .withValues(alpha: .045),
+          AppColors.coral
+              .withValues(alpha: 0),
+        ],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(
+            size.width * .18,
+            size.height * .96,
+          ),
+          radius: 280,
+        ),
+      );
+
     canvas.drawCircle(
-      Offset(size.width * 0.18, size.height * 0.96),
+      Offset(
+        size.width * .18,
+        size.height * .96,
+      ),
       280,
       coralGlow,
     );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(
+    covariant CustomPainter oldDelegate,
+  ) =>
+      false;
 }
