@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/model_version_model.dart';
 import '../../../../shared/widgets/admin_surface.dart';
+import '../../../../shared/widgets/admin_skeleton.dart';
 import '../../state/model_registry_admin_provider.dart';
 
 class ModelRegistryScreen
@@ -663,16 +664,7 @@ class _ModelRegistryScreenState
 
         registry.when(
           loading: () =>
-              const AdminSurface(
-            padding:
-                EdgeInsets.all(
-              30,
-            ),
-            child: Center(
-              child:
-                  CircularProgressIndicator(),
-            ),
-          ),
+              const _ModelRegistryListSkeleton(),
           error: (
             error,
             stack,
@@ -881,15 +873,7 @@ class _ActiveModelCard
       ),
       child: state.when(
         loading: () =>
-            const SizedBox(
-          height: 100,
-          child: Center(
-            child:
-                CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
-          ),
-        ),
+            const _ActiveModelSkeleton(),
         error: (
           error,
           stack,
@@ -1073,6 +1057,215 @@ class _ActiveModelCard
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ActiveModelSkeleton
+    extends StatelessWidget {
+  const _ActiveModelSkeleton();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return AdminSkeleton(
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              AdminSkeletonBox(
+                width: 37,
+                height: 37,
+                radius: 10,
+              ),
+              SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    AdminSkeletonBox(
+                      width: 120,
+                      height: 13,
+                      radius: 6,
+                    ),
+                    SizedBox(height: 6),
+                    AdminSkeletonBox(
+                      width: 92,
+                      height: 9,
+                      radius: 4,
+                    ),
+                  ],
+                ),
+              ),
+              AdminSkeletonBox(
+                width: 72,
+                height: 24,
+                radius: 12,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const AdminSkeletonBox(
+            width: 150,
+            height: 11,
+            radius: 5,
+          ),
+          const SizedBox(height: 7),
+          const AdminSkeletonBox(
+            width: 240,
+            height: 9,
+            radius: 4,
+          ),
+          const SizedBox(height: 13),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AdminSkeletonBox(
+              width: MediaQuery.sizeOf(context).width <
+                      700
+                  ? 90
+                  : 104,
+              height: 34,
+              radius: 9,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModelRegistryListSkeleton
+    extends StatelessWidget {
+  const _ModelRegistryListSkeleton();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return const Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
+      children: [
+        AdminSkeleton(
+          child: AdminSkeletonBox(
+            width: 145,
+            height: 14,
+            radius: 7,
+          ),
+        ),
+        SizedBox(height: 10),
+        _ModelVersionSkeletonCard(),
+        SizedBox(height: 10),
+        _ModelVersionSkeletonCard(),
+        SizedBox(height: 10),
+        _ModelVersionSkeletonCard(),
+      ],
+    );
+  }
+}
+
+class _ModelVersionSkeletonCard
+    extends StatelessWidget {
+  const _ModelVersionSkeletonCard();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return AdminSkeleton(
+      child: AdminSurface(
+        padding: const EdgeInsets.all(17),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                AdminSkeletonBox(
+                  width: 40,
+                  height: 40,
+                  radius: 11,
+                ),
+                SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      AdminSkeletonBox(
+                        width: 190,
+                        height: 12,
+                        radius: 6,
+                      ),
+                      SizedBox(height: 8),
+                      AdminSkeletonBox(
+                        width: 180,
+                        height: 9,
+                        radius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                AdminSkeletonBox(
+                  width: 80,
+                  height: 24,
+                  radius: 12,
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                AdminSkeletonBox(
+                  width: 68,
+                  height: 24,
+                  radius: 8,
+                ),
+                AdminSkeletonBox(
+                  width: 76,
+                  height: 24,
+                  radius: 8,
+                ),
+                AdminSkeletonBox(
+                  width: 90,
+                  height: 24,
+                  radius: 8,
+                ),
+                AdminSkeletonBox(
+                  width: 96,
+                  height: 24,
+                  radius: 8,
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Row(
+              children: [
+                const AdminSkeletonBox(
+                  width: 82,
+                  height: 34,
+                  radius: 9,
+                ),
+                const Spacer(),
+                AdminSkeletonBox(
+                  width: MediaQuery.sizeOf(context).width <
+                          700
+                      ? 96
+                      : 112,
+                  height: 36,
+                  radius: 9,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

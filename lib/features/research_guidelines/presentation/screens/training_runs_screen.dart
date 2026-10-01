@@ -9,6 +9,7 @@ import '../../../../shared/models/model_specification_model.dart';
 import '../../../../shared/models/training_config_model.dart';
 import '../../../../shared/models/training_run_model.dart';
 import '../../../../shared/widgets/admin_surface.dart';
+import '../../../../shared/widgets/admin_skeleton.dart';
 
 import '../../state/model_specification_admin_provider.dart';
 import '../../state/training_config_admin_provider.dart';
@@ -1524,12 +1525,131 @@ class _LoadingCard
   Widget build(
     BuildContext context,
   ) {
-    return const AdminSurface(
-      padding:
-          EdgeInsets.all(30),
-      child: Center(
-        child:
-            CircularProgressIndicator(),
+    return const Column(
+      children: [
+        _TrainingRunSkeletonCard(),
+        SizedBox(height: 10),
+        _TrainingRunSkeletonCard(),
+        SizedBox(height: 10),
+        _TrainingRunSkeletonCard(),
+      ],
+    );
+  }
+}
+
+class _TrainingRunSkeletonCard
+    extends StatelessWidget {
+  const _TrainingRunSkeletonCard();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return AdminSkeleton(
+      child: AdminSurface(
+        padding:
+            const EdgeInsets.all(
+          17,
+        ),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                AdminSkeletonBox(
+                  width: 40,
+                  height: 40,
+                  radius: 11,
+                ),
+                SizedBox(
+                  width: 13,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      AdminSkeletonBox(
+                        width: 210,
+                        height: 12,
+                        radius: 6,
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      AdminSkeletonBox(
+                        width: 170,
+                        height: 9,
+                        radius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 12,
+                ),
+                AdminSkeletonBox(
+                  width: 82,
+                  height: 24,
+                  radius: 12,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 14,
+            ),
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                AdminSkeletonBox(
+                  width: 70,
+                  height: 24,
+                  radius: 8,
+                ),
+                AdminSkeletonBox(
+                  width: 78,
+                  height: 24,
+                  radius: 8,
+                ),
+                AdminSkeletonBox(
+                  width: 92,
+                  height: 24,
+                  radius: 8,
+                ),
+                AdminSkeletonBox(
+                  width: 68,
+                  height: 24,
+                  radius: 8,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Row(
+              children: [
+                const AdminSkeletonBox(
+                  width: 82,
+                  height: 34,
+                  radius: 9,
+                ),
+                const Spacer(),
+                AdminSkeletonBox(
+                  width: MediaQuery.sizeOf(
+                            context,
+                          ).width <
+                          700
+                      ? 96
+                      : 122,
+                  height: 36,
+                  radius: 9,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

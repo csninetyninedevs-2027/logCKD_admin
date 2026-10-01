@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/hydration_guideline_model.dart';
+import '../../../../shared/widgets/admin_skeleton.dart';
 import '../../state/hydration_guideline_admin_provider.dart';
 
 class HydrationGuidelinesScreen extends ConsumerStatefulWidget {
@@ -2987,28 +2988,265 @@ class _LoadingCard
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.surface
-            .withValues(alpha: .45),
-        borderRadius:
-            BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.border,
+    final isPublishedCard = height >= 150;
+
+    return AdminSkeleton(
+      child: Container(
+        width: double.infinity,
+        height: height,
+        padding: EdgeInsets.all(
+          isPublishedCard ? 20 : 17,
         ),
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 22,
-          height: 22,
-          child:
-              CircularProgressIndicator(
-            strokeWidth: 2,
+        decoration: BoxDecoration(
+          color: AppColors.surface
+              .withValues(alpha: .45),
+          borderRadius: BorderRadius.circular(
+            isPublishedCard ? 16 : 14,
+          ),
+          border: Border.all(
+            color: isPublishedCard
+                ? AppColors.primaryBright
+                    .withValues(alpha: .14)
+                : AppColors.border,
           ),
         ),
+        child: isPublishedCard
+            ? const _PublishedLoadingContent()
+            : const _VersionLoadingContent(),
       ),
+    );
+  }
+}
+
+class _PublishedLoadingContent
+    extends StatelessWidget {
+  const _PublishedLoadingContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            constraints.maxWidth < 720;
+
+        const information = Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AdminSkeletonBox(
+                  width: 42,
+                  height: 42,
+                  radius: 12,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      AdminSkeletonBox(
+                        width: 112,
+                        height: 8,
+                        radius: 4,
+                      ),
+                      SizedBox(height: 7),
+                      AdminSkeletonBox(
+                        width: 190,
+                        height: 15,
+                        radius: 7,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                AdminSkeletonBox(
+                  width: 92,
+                  height: 27,
+                  radius: 9,
+                ),
+                AdminSkeletonBox(
+                  width: 76,
+                  height: 27,
+                  radius: 14,
+                ),
+                AdminSkeletonBox(
+                  width: 86,
+                  height: 27,
+                  radius: 9,
+                ),
+                AdminSkeletonBox(
+                  width: 132,
+                  height: 27,
+                  radius: 9,
+                ),
+              ],
+            ),
+            SizedBox(height: 13),
+            AdminSkeletonBox(
+              width: 360,
+              height: 10,
+              radius: 5,
+            ),
+          ],
+        );
+
+        const actions = Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            AdminSkeletonBox(
+              width: 102,
+              height: 36,
+              radius: 9,
+            ),
+            AdminSkeletonBox(
+              width: 148,
+              height: 36,
+              radius: 9,
+            ),
+          ],
+        );
+
+        if (compact) {
+          return const Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              information,
+              SizedBox(height: 18),
+              actions,
+            ],
+          );
+        }
+
+        return const Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.end,
+          children: [
+            Expanded(child: information),
+            SizedBox(width: 20),
+            actions,
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _VersionLoadingContent
+    extends StatelessWidget {
+  const _VersionLoadingContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            constraints.maxWidth < 760;
+
+        const details = Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            AdminSkeletonBox(
+              width: 39,
+              height: 39,
+              radius: 11,
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      AdminSkeletonBox(
+                        width: 150,
+                        height: 13,
+                        radius: 6,
+                      ),
+                      SizedBox(width: 8),
+                      AdminSkeletonBox(
+                        width: 68,
+                        height: 20,
+                        radius: 10,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 9),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 5,
+                    children: [
+                      AdminSkeletonBox(
+                        width: 72,
+                        height: 9,
+                        radius: 4,
+                      ),
+                      AdminSkeletonBox(
+                        width: 62,
+                        height: 9,
+                        radius: 4,
+                      ),
+                      AdminSkeletonBox(
+                        width: 118,
+                        height: 9,
+                        radius: 4,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        const actions = Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            AdminSkeletonBox(
+              width: 66,
+              height: 34,
+              radius: 9,
+            ),
+            AdminSkeletonBox(
+              width: 86,
+              height: 34,
+              radius: 9,
+            ),
+          ],
+        );
+
+        if (compact) {
+          return const Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              details,
+              SizedBox(height: 12),
+              actions,
+            ],
+          );
+        }
+
+        return const Row(
+          children: [
+            Expanded(child: details),
+            SizedBox(width: 16),
+            actions,
+          ],
+        );
+      },
     );
   }
 }

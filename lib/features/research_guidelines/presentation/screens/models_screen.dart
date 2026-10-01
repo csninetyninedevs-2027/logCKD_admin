@@ -8,6 +8,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/model_specification_model.dart';
 import '../../../../shared/models/training_config_model.dart';
 import '../../../../shared/widgets/admin_surface.dart';
+import '../../../../shared/widgets/admin_skeleton.dart';
 import '../../state/model_specification_admin_provider.dart';
 import '../../state/training_config_admin_provider.dart';
 
@@ -1948,12 +1949,195 @@ class _LoadingCard
 
   @override
   Widget build(BuildContext context) {
-    return const AdminSurface(
-      padding:
-          EdgeInsets.all(30),
-      child: Center(
-        child:
-            CircularProgressIndicator(),
+    return const Column(
+      children: [
+        _ModelsSummarySkeleton(),
+        SizedBox(height: 12),
+        _ModelsItemSkeleton(),
+        SizedBox(height: 10),
+        _ModelsItemSkeleton(),
+        SizedBox(height: 10),
+        _ModelsItemSkeleton(),
+      ],
+    );
+  }
+}
+
+class _ModelsSummarySkeleton
+    extends StatelessWidget {
+  const _ModelsSummarySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return AdminSkeleton(
+      child: SizedBox(
+        width: double.infinity,
+        child: AdminSurface(
+          padding: const EdgeInsets.all(16),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact =
+                  constraints.maxWidth < 620;
+
+              final info = Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  FractionallySizedBox(
+                    widthFactor:
+                        compact ? .62 : .30,
+                    alignment:
+                        Alignment.centerLeft,
+                    child:
+                        const AdminSkeletonBox(
+                      height: 14,
+                      radius: 7,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FractionallySizedBox(
+                    widthFactor:
+                        compact ? .48 : .22,
+                    alignment:
+                        Alignment.centerLeft,
+                    child:
+                        const AdminSkeletonBox(
+                      height: 10,
+                      radius: 5,
+                    ),
+                  ),
+                ],
+              );
+
+              final button = SizedBox(
+                width: compact
+                    ? double.infinity
+                    : 150,
+                child:
+                    const AdminSkeletonBox(
+                  height: 38,
+                  radius: 10,
+                ),
+              );
+
+              if (compact) {
+                return Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    info,
+                    const SizedBox(
+                      height: 14,
+                    ),
+                    button,
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: info,
+                  ),
+                  const SizedBox(width: 14),
+                  button,
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModelsItemSkeleton
+    extends StatelessWidget {
+  const _ModelsItemSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return AdminSkeleton(
+      child: SizedBox(
+        width: double.infinity,
+        child: AdminSurface(
+        padding: const EdgeInsets.all(16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact =
+                constraints.maxWidth < 640;
+
+            const details = Row(
+              children: [
+                AdminSkeletonBox(
+                  width: 24,
+                  height: 24,
+                  radius: 7,
+                ),
+                SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      AdminSkeletonBox(
+                        width: 220,
+                        height: 13,
+                        radius: 6,
+                      ),
+                      SizedBox(height: 8),
+                      AdminSkeletonBox(
+                        width: 310,
+                        height: 10,
+                        radius: 5,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+
+            const trailing = Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AdminSkeletonBox(
+                  width: 74,
+                  height: 24,
+                  radius: 12,
+                ),
+                SizedBox(width: 8),
+                AdminSkeletonBox(
+                  width: 32,
+                  height: 32,
+                  radius: 9,
+                ),
+              ],
+            );
+
+            if (compact) {
+              return const Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  details,
+                  SizedBox(height: 14),
+                  trailing,
+                ],
+              );
+            }
+
+            return const Row(
+              children: [
+                Expanded(
+                  child: details,
+                ),
+                SizedBox(width: 14),
+                trailing,
+              ],
+            );
+          },
+        ),
+      ),
       ),
     );
   }
